@@ -349,27 +349,6 @@ read_default() {
   read_default_result=`echo $read_config_result | sed "s/^\([\"']\)\(.*\)\1\$/\2/g"`
 }
 
-assert_maxmind_license_key() {
-  if  ! grep DISCOURSE_MAXMIND_LICENSE_KEY $web_file >/dev/null 2>&1
-  then
-    echo "Adding MAXMIND placeholder to $web_file"
-    sed -i '/^.*LETSENCRYPT_ACCOUNT_EMAIL.*/a \ \ #DISCOURSE_MAXMIND_LICENSE_KEY: 1234567890123456' $web_file
-  fi
-  if  ! grep DISCOURSE_MAXMIND_LICENSE_KEY $web_file >/dev/null 2>&1
-  then
-    cat <<EOF
-
-    Adding DISCOURSE_MAXMIND_LICENSE_KEY to $web_file has failed! This
-    indicates either that your $web_file is very old or otherwise not
-    what the script expects or that there is a bug in this script. The
-    best solution for a novice is to delete $web_file and start over.
-    An expert might prefer to edit $web_file by hand.
-
-EOF
-    read -p "Press return to continue or control-c to quit..."
-  fi
-}
-
 assert_smtp_domain() {
   if  ! grep DISCOURSE_SMTP_DOMAIN $web_file >/dev/null 2>&1
   then
@@ -887,7 +866,7 @@ then
     echo "DEBUG MODE ON. Not stopping the container."
   fi
   ./launcher stop $app_name
-  assert_maxmind_license_key
+  # assert_maxmind_license_key
   assert_notification_email
   assert_smtp_domain
   echo

@@ -1,12 +1,14 @@
-# NAME:     discourse/base
+﻿# NAME:     bamzooka/base
 # VERSION:  release
+# CREDIT: discourse docker project
+# https://github.com/discourse/discourse_docker
 FROM debian:buster-slim
 
 ENV PG_MAJOR 13
 ENV RUBY_ALLOCATOR /usr/lib/libjemalloc.so.1
 ENV RAILS_ENV production
 
-#LABEL maintainer="Sam Saffron \"https://twitter.com/samsaffron\""
+#LABEL maintainer="Daniel Guermeur \"https://twitter.com/supercobra\""
 
 RUN echo 2.0.`date +%Y%m%d` > /VERSION
 
@@ -23,29 +25,31 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-RUN curl https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | \
-        tee /etc/apt/sources.list.d/postgres.list
+#RUN curl https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
+#RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | \
+#        tee /etc/apt/sources.list.d/postgres.list
 RUN curl --silent --location https://deb.nodesource.com/setup_14.x | sudo bash -
 RUN apt -y update
 # install these without recommends to avoid pulling in e.g.
 # X11 libraries, mailutils
 RUN apt -y install --no-install-recommends git rsyslog logrotate cron ssh-client less
+
 RUN apt -y install build-essential rsync \
                        libxslt-dev libcurl4-openssl-dev \
                        libssl-dev libyaml-dev libtool \
                        libxml2-dev gawk parallel \
-                       postgresql-${PG_MAJOR} postgresql-client-${PG_MAJOR} \
-                       postgresql-contrib-${PG_MAJOR} libpq-dev libreadline-dev \
+                       # postgresql-${PG_MAJOR} postgresql-client-${PG_MAJOR} \
+                       # postgresql-contrib-${PG_MAJOR} libpq-dev libreadline-dev \
                        anacron wget \
                        psmisc vim whois brotli libunwind-dev \
                        libtcmalloc-minimal4 cmake \
-                       pngcrush pngquant
+                       pngcrush pngquant wget
+
 RUN sed -i -e 's/start -q anacron/anacron -s/' /etc/cron.d/anacron
 RUN sed -i.bak 's/$ModLoad imklog/#$ModLoad imklog/' /etc/rsyslog.conf
 RUN sed -i.bak 's/module(load="imklog")/#module(load="imklog")/' /etc/rsyslog.conf
 RUN dpkg-divert --local --rename --add /sbin/initctl
-RUN sh -c "test -f /sbin/initctl || ln -s /bin/true /sbin/initctl"
+RUN sh -c "test -f /sbin/ini || ln -s /bin/true /sbin/initctl"
 RUN cd / &&\
     apt -y install runit socat &&\
     mkdir -p /etc/runit/1.d &&\
@@ -58,6 +62,9 @@ RUN cd / &&\
 
 ADD install-nginx /tmp/install-nginx
 RUN /tmp/install-nginx
+
+ADD install-mysql /tmp/install-mysql
+RUN /tmp/install-mysql
 
 RUN apt -y install advancecomp jhead jpegoptim libjpeg-turbo-progs optipng
 
@@ -85,11 +92,11 @@ RUN gem install bundler --force &&\
 ADD install-redis /tmp/install-redis
 RUN /tmp/install-redis
 
-ADD install-imagemagick /tmp/install-imagemagick
-RUN /tmp/install-imagemagick
+# ADD install-imagemagick /tmp/install-imagemagick
+# RUN /tmp/install-imagemagick
 
 # Validate install
-RUN ruby -Eutf-8 -e "v = \`convert -version\`; %w{png tiff jpeg freetype heic}.each { |f| unless v.include?(f); STDERR.puts('no ' + f +  ' support in imagemagick'); exit(-1); end }"
+#RUN ruby -Eutf-8 -e "v = \`convert -version\`; %w{png tiff jpeg freetype heic}.each { |f| unless v.include?(f); STDERR.puts('no ' + f +  ' support in imagemagick'); exit(-1); end }"
 
 # This tool allows us to disable huge page support for our current process
 # since the flag is preserved through forks and execs it can be used on any
@@ -128,15 +135,11 @@ ADD cron /etc/service/cron/run
 ADD rsyslog /etc/service/rsyslog/run
 ADD cron.d_anacron /etc/cron.d/anacron
 
-# Discourse specific bits
-RUN useradd discourse -s /bin/bash -m -U &&\
-    mkdir -p /var/www &&\
-    cd /var/www &&\
-    git clone --depth 1 https://github.com/discourse/discourse.git &&\
-    cd discourse &&\
-    git remote set-branches --add origin tests-passed &&\
-    chown -R discourse:discourse /var/www/discourse &&\
-    cd /var/www/discourse &&\
-    sudo -u discourse bundle install --deployment --jobs 4 --without test development &&\
-    bundle exec rake maxminddb:get &&\
-    find /var/www/discourse/vendor/bundle -name tmp -type d -exec rm -rf {} +
+COPY bamzooka bamzooka
+RUN mkdir -p /var/www
+RUN mv bamzooka /var/www/
+RUN useradd bamzooka -s /bin/bash -m -U &&\
+    chown -R bamzooka:bamzooka /var/www/bamzooka &&\
+    cd /var/www/bamzooka &&
+    sudo -u bamzooka bundle install --deployment --jobs 4 --without test development &&\
+    find /var/www/bamzooka/vendor/bundle -name tmp -type d -exec rm -rf {} +
