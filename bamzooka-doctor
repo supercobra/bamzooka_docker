@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-LOG_FILE="/tmp/discourse-debug.txt"
+LOG_FILE="/tmp/bamzooka-debug.txt"
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 log() {
@@ -62,7 +62,7 @@ check_ip_match() {
     log Google: \"open ports YOUR CLOUD SERVICE\" for information for resolving this problem.
     log
     log This test might not work for all situations,
-    log so if you can access Discourse at http://$HOST, this might not indicate a problem.
+    log so if you can access Bamzooka at http://$HOST, this might not indicate a problem.
     sleep 3
   fi
 }
@@ -71,8 +71,8 @@ check_docker_is_installed() {
   log -e "\n==================== DOCKER INFO ===================="
   docker_path="$(which docker.io || which docker)"
   if [ -z $docker_path ]; then
-    log "Docker is not installed. Have you installed Discourse at all?"
-    log "Perhaps you're looking for ./discourse-setup ."
+    log "Docker is not installed. Have you installed Bamzooka at all?"
+    log "Perhaps you're looking for ./bamzooka-setup ."
     log "There is no point in continuing."
     exit
   else
@@ -97,13 +97,13 @@ check_disk_and_memory() {
 
   log -e "\n==================== DISK SPACE CHECK ===================="
   log "---------- OS Disk Space ----------"
-  log "$(df -h / /var/discourse /var/lib/docker /var/lib/docker/* | uniq)"
+  log "$(df -h / /var/bamzooka /var/lib/docker /var/lib/docker/* | uniq)"
 
   if [ "$version" != "NOT FOUND" ]
   then
     log
     log "---------- Container Disk Space ----------"
-    log "$(sudo docker exec -w /var/www/discourse -i $app_name df -h / /shared/ /shared/postgres_data /shared/redis_data /shared/backups /var/log | uniq)"
+    log "$(sudo docker exec -w /var/www/bamzooka -i $app_name df -h / /shared/ /shared/postgres_data /shared/redis_data /shared/backups /var/log | uniq)"
   fi
 
   log -e "\n==================== DISK INFORMATION ===================="
@@ -111,7 +111,7 @@ check_disk_and_memory() {
   log -e "\n==================== END DISK INFORMATION ===================="
 
   free_disk="$(df /var | tail -n 1 | awk '{print $4}')"
-  # Arguably ./launcher is doing this so discourse-doctor does not need to . . .
+  # Arguably ./launcher is doing this so bamzooka-doctor does not need to . . .
   if [ "$free_disk" -lt 5000 ]; then
   log "\n\n==================== DISK SPACE PROBLEM ===================="
     log  "WARNING: you appear to have very low disk space."
@@ -124,10 +124,10 @@ check_disk_and_memory() {
   fi
 }
 
-get_discourse_version() {
+get_bamzooka_version() {
   version=""
   version=$(wget -q --timeout=3 https://$VERSION_HOSTNAME/privacy  -O -|grep generator|head -1 |cut -d "=" -f 3|cut -d '-' -f 1 |cut -d '"' -f 2)  &> /dev/null
-  if ! echo $version | grep Discourse
+  if ! echo $version | grep Bamzooka
   then
     version=$(wget -q --timeout=3 http://$VERSION_HOSTNAME/privacy  -O -|grep generator|head -1 |cut -d "=" -f 3|cut -d '-' -f 1 |cut -d '"' -f 2) &> /dev/null
   fi
@@ -135,47 +135,47 @@ get_discourse_version() {
   then
     version="NOT FOUND"
   fi
-  log "Discourse version at $VERSION_HOSTNAME: $version"
+  log "Bamzooka version at $VERSION_HOSTNAME: $version"
 }
 
 check_if_hostname_resolves_here() {
   log "========================================"
-  VERSION_HOSTNAME=$DISCOURSE_HOSTNAME
-  get_discourse_version
-  DISCOURSE_VERSION="$version"
+  VERSION_HOSTNAME=$BAMZOOKA_HOSTNAME
+  get_bamzooka_version
+  BAMZOOKA_VERSION="$version"
   VERSION_HOSTNAME=localhost
-  get_discourse_version
+  get_bamzooka_version
   LOCALHOST_VERSION="$version"
-  if [ "$DISCOURSE_VERSION" != "$LOCALHOST_VERSION" ]
+  if [ "$BAMZOOKA_VERSION" != "$LOCALHOST_VERSION" ]
   then
     log "==================== DNS PROBLEM ===================="
-    log "This server reports $LOCALHOST_VERSION, but $DISCOURSE_HOSTNAME reports $DISCOURSE_VERSION."
+    log "This server reports $LOCALHOST_VERSION, but $BAMZOOKA_HOSTNAME reports $BAMZOOKA_VERSION."
     log "This suggests that you have a DNS problem or that an intermediate proxy is to blame."
     log "If you are using Cloudflare, or a CDN, it may be improperly configured."
   fi
 }
 
 ##
-## get discourse configuration values from YML file
+## get bamzooka configuration values from YML file
 ##
-get_discourse_config() {
+get_bamzooka_config() {
   log -e "\n==================== YML SETTINGS ===================="
-  read_config "DISCOURSE_HOSTNAME"
-  DISCOURSE_HOSTNAME=$read_config_result
-  log DISCOURSE_HOSTNAME=$DISCOURSE_HOSTNAME
-  read_config "DISCOURSE_SMTP_ADDRESS"
+  read_config "BAMZOOKA_HOSTNAME"
+  BAMZOOKA_HOSTNAME=$read_config_result
+  log BAMZOOKA_HOSTNAME=$BAMZOOKA_HOSTNAME
+  read_config "BAMZOOKA_SMTP_ADDRESS"
   SMTP_ADDRESS=$read_config_result
   log SMTP_ADDRESS=$SMTP_ADDRESS
-  read_config "DISCOURSE_DEVELOPER_EMAILS"
+  read_config "BAMZOOKA_DEVELOPER_EMAILS"
   DEVELOPER_EMAILS=$read_config_result
   log DEVELOPER_EMAILS=$DEVELOPER_EMAILS
-  read_config "DISCOURSE_SMTP_PASSWORD"
+  read_config "BAMZOOKA_SMTP_PASSWORD"
   SMTP_PASSWORD=$read_config_result
   log SMTP_PASSWORD=$read_config_result
-  read_config "DISCOURSE_SMTP_PORT"
+  read_config "BAMZOOKA_SMTP_PORT"
   SMTP_PORT=$read_config_result
   log SMTP_PORT=$read_config_result
-  read_config "DISCOURSE_SMTP_USER_NAME"
+  read_config "BAMZOOKA_SMTP_USER_NAME"
   SMTP_USER_NAME=$read_config_result
   log SMTP_USER_NAME=$read_config_result
   read_config "LETSENCRYPT_ACCOUNT_EMAIL"
@@ -188,7 +188,7 @@ check_plugins() {
   log -e "$(grep 'git clone' containers/$app_name.yml)"
   grep git containers/$app_name.yml > /tmp/$PPID.grep
 
-  if grep -cv "github.com/discourse" /tmp/$PPID.grep > /dev/null
+  if grep -cv "github.com/bamzooka" /tmp/$PPID.grep > /dev/null
   then
     log -e "\nWARNING:"
     log You have what appear to be non-official plugins.
@@ -196,7 +196,7 @@ check_plugins() {
   else
     log -e "\nNo non-official plugins detected."
   fi
-  log -e "\nSee https://github.com/discourse/discourse/blob/master/lib/plugin/metadata.rb for the official list.\n"
+  log -e "\nSee https://github.com/bamzooka/bamzooka/blob/master/lib/plugin/metadata.rb for the official list.\n"
 }
 
 dump_yaml() {
@@ -230,7 +230,7 @@ check_email() {
   if [ "$new_value" != "n" ] && [ "$new_value" != "N" ]
   then
     log "Sending mail to $EMAIL. . . "
-    log "$(sudo docker exec -w /var/www/discourse -i $app_name rake emails:test[$EMAIL])"
+    log "$(sudo docker exec -w /var/www/bamzooka -i $app_name rake emails:test[$EMAIL])"
   else
     log "Mail test skipped."
   fi
@@ -261,7 +261,7 @@ check_docker() {
 
   if grep $app_name /tmp/$UUID-docker.txt
   then
-    log -e "\nDiscourse container $app_name is running"
+    log -e "\nBamzooka container $app_name is running"
   else
     log "==================== SERIOUS PROBLEM!!!! ===================="
     log "$app_name not running!"
@@ -273,14 +273,14 @@ check_docker() {
     docker ps | tail -n +2 > /tmp/$UUID-docker.txt
     if grep $app_name /tmp/$UUID-docker.txt
     then
-      log -e "\nDiscourse container $app_name is now running."
+      log -e "\nBamzooka container $app_name is now running."
       log ". . . waiting 30 seconds for container to crank up. . . "
       sleep 30
     else
       log "Failed to rebuild $app_name."
-      # check_ip_match checks if curl to $DISCOURSE_HOSTNAME gets to this server
+      # check_ip_match checks if curl to $BAMZOOKA_HOSTNAME gets to this server
       # It works only if ports 80 and 443 are free
-      check_ip_match $DISCOURSE_HOSTNAME
+      check_ip_match $BAMZOOKA_HOSTNAME
       log "You should probably remove any non-standard plugins and rebuild."
       NO_CONTAINER='y'
       log "Attempting to restart existing container. . . "
@@ -302,7 +302,7 @@ check_docker() {
 ##
 clean_up_log_file() {
   for VAR
-  in SMTP_PASSWORD LETSENCRYPT_ACCOUNT_EMAIL DEVELOPER_EMAILS DISCOURSE_DB_PASSWORD 'Sending mail to'
+  in SMTP_PASSWORD LETSENCRYPT_ACCOUNT_EMAIL DEVELOPER_EMAILS BAMZOOKA_DB_PASSWORD 'Sending mail to'
   do
     echo "Replacing: $VAR"
     sed -i -e 's/'"$VAR"'\([=: ]\)\S*/'"$VAR"'\1REDACTED /g' $LOG_FILE
@@ -320,8 +320,8 @@ print_done() {
     if [ $serve == 'Y' ]
     then
         cp $LOG_FILE shared/standalone/log/var-log/$DOCTOR_FILE
-        sudo docker exec -w /var/www/discourse -i $app_name cp /var/log/$DOCTOR_FILE  public
-        log "The output of this program may be available at http://$DISCOURSE_HOSTNAME/$DOCTOR_FILE"
+        sudo docker exec -w /var/www/bamzooka -i $app_name cp /var/log/$DOCTOR_FILE  public
+        log "The output of this program may be available at http://$BAMZOOKA_HOSTNAME/$DOCTOR_FILE"
         log "You should inspect that file carefully before sharing the URL."
     else
         log "Publicly available log not generated."
@@ -347,7 +347,7 @@ print_done() {
 initialize_log_file() {
   rm -f $LOG_FILE
   touch $LOG_FILE
-  log DISCOURSE DOCTOR $(date)
+  log BAMZOOKA DOCTOR $(date)
   log -e "OS: $(uname -a)\n\n"
 }
 
@@ -359,7 +359,7 @@ check_root
 cd $WORKING_DIR || exit
 initialize_log_file
 get_yml_file
-get_discourse_config
+get_bamzooka_config
 check_docker_is_installed
 check_docker
 check_plugins

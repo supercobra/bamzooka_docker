@@ -2,6 +2,8 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR
 
+set +x
+
 if [ "$1" == "2container" ]
 then
   TWO_CONTAINER="1"
@@ -97,7 +99,7 @@ check_IP_match() {
         echo "WARNING: Connection to http://$HOST (port 80) also fails."
         echo
         echo "This suggests that $HOST resolves to some IP address that does not reach this "
-        echo machine where you are installing discourse.
+        echo machine where you are installing bamzooka.
       fi
       echo
       echo "The first thing to do is confirm that $HOST resolves to the IP address of this server."
@@ -165,7 +167,7 @@ check_linux_memory() {
 }
 
 ##
-## Do we have enough memory and disk space for Discourse?
+## Do we have enough memory and disk space for Bamzooka?
 ##
 check_disk_and_memory() {
 
@@ -178,10 +180,10 @@ check_disk_and_memory() {
   fi
 
   if [ "$avail_mem" -lt 1 ]; then
-    echo "WARNING: Discourse requires 1GB RAM to run. This system does not appear"
+    echo "WARNING: Bamzooka requires 1GB RAM to run. This system does not appear"
     echo "to have sufficient memory."
     echo
-    echo "Your site may not work properly, or future upgrades of Discourse may not"
+    echo "Your site may not work properly, or future upgrades of Bamzooka may not"
     echo "complete successfully."
     exit 1
   fi
@@ -190,17 +192,17 @@ check_disk_and_memory() {
     total_swap=`free -g --si | awk ' /Swap:/  {print $2} '`
 
     if [ "$total_swap" -lt 2 ]; then
-      echo "WARNING: Discourse requires at least 2GB of swap when running with 2GB of RAM"
+      echo "WARNING: Bamzooka requires at least 2GB of swap when running with 2GB of RAM"
       echo "or less. This system does not appear to have sufficient swap space."
       echo
       echo "Without sufficient swap space, your site may not work properly, and future"
-      echo "upgrades of Discourse may not complete successfully."
+      echo "upgrades of Bamzooka may not complete successfully."
       echo
       echo "Ctrl+C to exit or wait 5 seconds to have a 2GB swapfile created."
       sleep 5
 
       ##
-      ## derived from https://meta.discourse.org/t/13880
+      ## derived from https://meta.bamzooka.org/t/13880
       ##
       install -o root -g root -m 0600 /dev/null /swapfile
       fallocate -l 2G /swapfile
@@ -208,7 +210,7 @@ check_disk_and_memory() {
       swapon /swapfile
       echo "/swapfile       swap    swap    auto      0       0" | tee -a /etc/fstab
       sysctl -w vm.swappiness=10
-      echo 'vm.swappiness = 10' > /etc/sysctl.d/30-discourse-swap.conf
+      echo 'vm.swappiness = 10' > /etc/sysctl.d/30-bamzooka-swap.conf
 
       total_swap=`free -g --si | awk ' /Swap:/ {print $2} '`
       if [ "$total_swap" -lt 2 ]; then
@@ -221,11 +223,11 @@ check_disk_and_memory() {
 
   free_disk="$(df /var | tail -n 1 | awk '{print $4}')"
   if [ "$free_disk" -lt 5000 ]; then
-    echo "WARNING: Discourse requires at least 5GB free disk space. This system"
+    echo "WARNING: Bamzooka requires at least 5GB free disk space. This system"
     echo "does not appear to have sufficient disk space."
     echo
     echo "Insufficient disk space may result in problems running your site, and"
-    echo "may not even allow Discourse installation to complete successfully."
+    echo "may not even allow Bamzooka installation to complete successfully."
     echo
     echo "Please free up some space, or expand your disk, before continuing."
     echo
@@ -320,16 +322,16 @@ check_port() {
     echo "This will show you what command is using port ${1}"
     lsof -i tcp:${1} -s tcp:listen
     echo
-    echo "If you are trying to run Discourse simultaneously with another web"
+    echo "If you are trying to run Bamzooka simultaneously with another web"
     echo "server like Apache or nginx, you will need to bind to a different port"
     echo
-    echo "See https://meta.discourse.org/t/17247"
+    echo "See https://meta.bamzooka.org/t/17247"
     echo
-    echo "If you are reconfiguring an already-configured Discourse, use "
+    echo "If you are reconfiguring an already-configured Bamzooka, use "
     echo
     echo "./launcher stop app"
     echo
-    echo "to stop Discourse before you reconfigure it and try again."
+    echo "to stop Bamzooka before you reconfigure it and try again."
     exit 1
   fi
 }
@@ -350,16 +352,16 @@ read_default() {
 }
 
 assert_smtp_domain() {
-  if  ! grep DISCOURSE_SMTP_DOMAIN $web_file >/dev/null 2>&1
+  if  ! grep BAMZOOKA_SMTP_DOMAIN $web_file >/dev/null 2>&1
   then
     echo "Adding SMTP_DOMAIN placeholder to $web_file"
-    sed -i '/^.*DISCOURSE_SMTP_PASSWORD.*/a \ \ #DISCOURSE_SMTP_DOMAIN: discourse.example.com    # (required by some providers)' $web_file
+    sed -i '/^.*BAMZOOKA_SMTP_PASSWORD.*/a \ \ #BAMZOOKA_SMTP_DOMAIN: bamzooka.example.com    # (required by some providers)' $web_file
   fi
-  if  ! grep DISCOURSE_SMTP_DOMAIN $web_file >/dev/null 2>&1
+  if  ! grep BAMZOOKA_SMTP_DOMAIN $web_file >/dev/null 2>&1
   then
     cat <<EOF
 
-    Adding DISCOURSE_SMTP_DOMAIN to $web_file has failed! This
+    Adding BAMZOOKA_SMTP_DOMAIN to $web_file has failed! This
     indicates either that your $web_file is very old or otherwise not
     what the script expects or that there is a bug in this script. The
     best solution for a novice is to delete $web_file and start over.
@@ -372,16 +374,16 @@ EOF
 
 
 assert_notification_email() {
-  if  ! grep DISCOURSE_NOTIFICATION_EMAIL $web_file >/dev/null 2>&1
+  if  ! grep BAMZOOKA_NOTIFICATION_EMAIL $web_file >/dev/null 2>&1
   then
-    echo "Adding DISCOURSE_NOTIFICATION_EMAIL placeholder to $web_file"
-    sed -i '/^.*DISCOURSE_SMTP_PASSWORD.*/a \ \ #DISCOURSE_NOTIFICATION_EMAIL: nobody@discourse.example.com    # (address to send notifications from)' $web_file
+    echo "Adding BAMZOOKA_NOTIFICATION_EMAIL placeholder to $web_file"
+    sed -i '/^.*BAMZOOKA_SMTP_PASSWORD.*/a \ \ #BAMZOOKA_NOTIFICATION_EMAIL: nobody@bamzooka.example.com    # (address to send notifications from)' $web_file
   fi
-  if  ! grep DISCOURSE_NOTIFICATION_EMAIL $web_file >/dev/null 2>&1
+  if  ! grep BAMZOOKA_NOTIFICATION_EMAIL $web_file >/dev/null 2>&1
   then
     cat <<EOF
 
-    Adding DISCOURSE_NOTIFICATION_EMAIL to $web_file has failed! This
+    Adding BAMZOOKA_NOTIFICATION_EMAIL to $web_file has failed! This
     indicates either that your $web_file is very old or otherwise not
     what the script expects or that there is a bug in this script. The
     best solution for a novice is to delete $web_file and start over.
@@ -394,34 +396,34 @@ EOF
 
 
 ##
-## prompt user for typical Discourse config file values
+## prompt user for typical Bamzooka config file values
 ##
 ask_user_for_config() {
 
   # NOTE: Defaults now come from standalone.yml
 
-  read_config "DISCOURSE_HOSTNAME"
+  read_config "BAMZOOKA_HOSTNAME"
   hostname=$read_config_result
   local changelog=/tmp/changelog.$PPID
-  read_config "DISCOURSE_SMTP_ADDRESS"
+  read_config "BAMZOOKA_SMTP_ADDRESS"
   local smtp_address=$read_config_result
   # NOTE: if there are spaces between emails, this breaks, but a human should be paying attention
-  read_config "DISCOURSE_DEVELOPER_EMAILS"
+  read_config "BAMZOOKA_DEVELOPER_EMAILS"
   local developer_emails=$read_config_result
-  read_config "DISCOURSE_SMTP_PASSWORD"
+  read_config "BAMZOOKA_SMTP_PASSWORD"
   local smtp_password=$read_config_result
-  read_config "DISCOURSE_SMTP_PORT"
+  read_config "BAMZOOKA_SMTP_PORT"
   local smtp_port=$read_config_result
-  read_config "DISCOURSE_SMTP_USER_NAME"
+  read_config "BAMZOOKA_SMTP_USER_NAME"
   local smtp_user_name=$read_config_result
   if [ "$smtp_password" = "pa$$word" ]
   then
     smtp_password = ""
   fi
-  read_config "DISCOURSE_NOTIFICATION_EMAIL"
+  read_config "BAMZOOKA_NOTIFICATION_EMAIL"
   local notification_email=$read_config_result
-  read_config "DISCOURSE_SMTP_DOMAIN"
-  local discourse_smtp_DOMAIN=$read_config_result
+  read_config "BAMZOOKA_SMTP_DOMAIN"
+  local bamzooka_smtp_DOMAIN=$read_config_result
 
   read_config "LETSENCRYPT_ACCOUNT_EMAIL"
   local letsencrypt_account_email=$read_config_result
@@ -436,7 +438,7 @@ ask_user_for_config() {
     local letsencrypt_status="Enter 'OFF' to disable."
   fi
 
-  read_config "DISCOURSE_MAXMIND_LICENSE_KEY"
+  read_config "BAMZOOKA_MAXMIND_LICENSE_KEY"
   local maxmind_license_key=$read_config_result
   if [ -z $maxmind_license_key ]
   then
@@ -457,7 +459,7 @@ ask_user_for_config() {
   do
     if [ ! -z "$hostname" ]
     then
-      read -p "Hostname for your Discourse? [$hostname]: " new_value
+      read -p "Hostname for your Bamzooka? [$hostname]: " new_value
       if [ ! -z "$new_value" ]
       then
         hostname="$new_value"
@@ -465,9 +467,9 @@ ask_user_for_config() {
       if [[ $hostname =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]
       then
         echo
-        echo "Discourse requires a DNS hostname. IP addresses are unsupported and will not work."
+        echo "Bamzooka requires a DNS hostname. IP addresses are unsupported and will not work."
         echo
-        hostname="discourse.example.com"
+        hostname="bamzooka.example.com"
       fi
     fi
 
@@ -548,7 +550,7 @@ ask_user_for_config() {
       smtp_password="$new_value"
     fi
 
-    if [[ "$notification_email" == "noreply@discourse.example.com"* ]]
+    if [[ "$notification_email" == "noreply@bamzooka.example.com"* ]]
     then
       notification_email="noreply@$hostname"
     fi
@@ -577,7 +579,7 @@ ask_user_for_config() {
       fi
     fi
 
-    read_config "DISCOURSE_MAXMIND_LICENSE_KEY"
+    read_config "BAMZOOKA_MAXMIND_LICENSE_KEY"
     local maxmind_license_key=$read_config_result
     read -p "Optional Maxmind License key ($maxmind_status) [$maxmind_license_key]: " new_value
     if [ ! -z "$new_value" ]
@@ -610,66 +612,66 @@ ask_user_for_config() {
     read -p "ENTER to continue, 'n' to try again, Ctrl+C to exit: " config_ok
   done
 
-  sed -i -e "s/^  DISCOURSE_HOSTNAME:.*/  DISCOURSE_HOSTNAME: $hostname/w $changelog" $web_file
+  sed -i -e "s/^  BAMZOOKA_HOSTNAME:.*/  BAMZOOKA_HOSTNAME: $hostname/w $changelog" $web_file
   if [ -s $changelog ]
   then
     rm $changelog
   else
-    echo "DISCOURSE_HOSTNAME change failed."
+    echo "BAMZOOKA_HOSTNAME change failed."
     update_ok="n"
   fi
 
-  sed -i -e "s/^  DISCOURSE_DEVELOPER_EMAILS:.*/  DISCOURSE_DEVELOPER_EMAILS: \'$developer_emails\'/w $changelog" $web_file
+  sed -i -e "s/^  BAMZOOKA_DEVELOPER_EMAILS:.*/  BAMZOOKA_DEVELOPER_EMAILS: \'$developer_emails\'/w $changelog" $web_file
   if [ -s $changelog ]
   then
     rm $changelog
   else
-    echo "DISCOURSE_DEVELOPER_EMAILS change failed."
+    echo "BAMZOOKA_DEVELOPER_EMAILS change failed."
     update_ok="n"
   fi
 
-  sed -i -e "s/^  DISCOURSE_SMTP_ADDRESS:.*/  DISCOURSE_SMTP_ADDRESS: $smtp_address/w $changelog" $web_file
+  sed -i -e "s/^  BAMZOOKA_SMTP_ADDRESS:.*/  BAMZOOKA_SMTP_ADDRESS: $smtp_address/w $changelog" $web_file
   if [ -s $changelog ]
   then
     rm $changelog
   else
-    echo "DISCOURSE_SMTP_ADDRESS change failed."
+    echo "BAMZOOKA_SMTP_ADDRESS change failed."
     update_ok="n"
   fi
 
-  sed -i -e "s/^  #\?DISCOURSE_SMTP_PORT:.*/  DISCOURSE_SMTP_PORT: $smtp_port/w $changelog" $web_file
+  sed -i -e "s/^  #\?BAMZOOKA_SMTP_PORT:.*/  BAMZOOKA_SMTP_PORT: $smtp_port/w $changelog" $web_file
   if [ -s $changelog ]
   then
     rm $changelog
   else
-    echo "DISCOURSE_SMTP_PORT change failed."
+    echo "BAMZOOKA_SMTP_PORT change failed."
     update_ok="n"
   fi
 
-  sed -i -e "s/^  #\?DISCOURSE_SMTP_USER_NAME:.*/  DISCOURSE_SMTP_USER_NAME: $smtp_user_name/w $changelog" $web_file
+  sed -i -e "s/^  #\?BAMZOOKA_SMTP_USER_NAME:.*/  BAMZOOKA_SMTP_USER_NAME: $smtp_user_name/w $changelog" $web_file
   if [ -s $changelog ]
   then
     rm $changelog
   else
-    echo "DISCOURSE_SMTP_USER_NAME change failed."
+    echo "BAMZOOKA_SMTP_USER_NAME change failed."
     update_ok="n"
   fi
 
-  sed -i -e "s/^  #\?DISCOURSE_NOTIFICATION_EMAIL:.*/  DISCOURSE_NOTIFICATION_EMAIL: $notification_email/w $changelog" $web_file
+  sed -i -e "s/^  #\?BAMZOOKA_NOTIFICATION_EMAIL:.*/  BAMZOOKA_NOTIFICATION_EMAIL: $notification_email/w $changelog" $web_file
   if [ -s $changelog ]
   then
     rm $changelog
   else
-    echo "DISCOURSE_NOTIFICATION_EMAIL change failed."
+    echo "BAMZOOKA_NOTIFICATION_EMAIL change failed."
     update_ok="n"
   fi
 
-  sed -i -e "s/^  #\?DISCOURSE_SMTP_DOMAIN:.*/  DISCOURSE_SMTP_DOMAIN: $smtp_domain/w $changelog" $web_file
+  sed -i -e "s/^  #\?BAMZOOKA_SMTP_DOMAIN:.*/  BAMZOOKA_SMTP_DOMAIN: $smtp_domain/w $changelog" $web_file
   if [ -s $changelog ]
   then
     rm $changelog
   else
-    echo "DISCOURSE_SMTP_DOMAIN change failed."
+    echo "BAMZOOKA_SMTP_DOMAIN change failed."
     update_ok="n"
   fi
 
@@ -704,13 +706,13 @@ ask_user_for_config() {
   fi
   if [[ "$SLASH" != "BROKEN" ]]
   then
-    sed -i -e "s${SLASH}^  #\?DISCOURSE_SMTP_PASSWORD:.*${SLASH}  DISCOURSE_SMTP_PASSWORD: \"${smtp_password}\"${SLASH}w $changelog" $web_file
+    sed -i -e "s${SLASH}^  #\?BAMZOOKA_SMTP_PASSWORD:.*${SLASH}  BAMZOOKA_SMTP_PASSWORD: \"${smtp_password}\"${SLASH}w $changelog" $web_file
 
     if [ -s $changelog ]
     then
       rm $changelog
     else
-      echo "DISCOURSE_SMTP_PASSWORD change failed."
+      echo "BAMZOOKA_SMTP_PASSWORD change failed."
       update_ok="n"
     fi
   fi
@@ -755,12 +757,12 @@ ask_user_for_config() {
   echo
   if [ $maxmind_license_key != "1234567890123456" ]
   then
-    sed -i -e "s/^.*DISCOURSE_MAXMIND_LICENSE_KEY:.*/  DISCOURSE_MAXMIND_LICENSE_KEY: $maxmind_license_key/w $changelog" $web_file
+    sed -i -e "s/^.*BAMZOOKA_MAXMIND_LICENSE_KEY:.*/  BAMZOOKA_MAXMIND_LICENSE_KEY: $maxmind_license_key/w $changelog" $web_file
     if [ -s $changelog ]
     then
       rm $changelog
     else
-      echo "DISCOURSE_MAXMIND_LICENSE_KEY change failed."
+      echo "BAMZOOKA_MAXMIND_LICENSE_KEY change failed."
       update_ok="n"
     fi
   fi
@@ -782,8 +784,8 @@ validate_config() {
 
   valid_config="y"
 
-  for x in DISCOURSE_SMTP_ADDRESS DISCOURSE_SMTP_USER_NAME DISCOURSE_SMTP_PASSWORD \
-                                  DISCOURSE_DEVELOPER_EMAILS DISCOURSE_HOSTNAME
+  for x in BAMZOOKA_SMTP_ADDRESS BAMZOOKA_SMTP_USER_NAME BAMZOOKA_SMTP_PASSWORD \
+                                  BAMZOOKA_DEVELOPER_EMAILS BAMZOOKA_HOSTNAME
   do
     read_config $x
     local result=$read_config_result
@@ -881,24 +883,24 @@ else
     echo "--------------------------------------------------"
     echo "This two container setup is currently unsupported. Use at your own risk!"
     echo "--------------------------------------------------"
-    DISCOURSE_DB_PASSWORD=`date +%s | sha256sum | base64 | head -c 20`
+    BAMZOOKA_DB_PASSWORD=`date +%s | sha256sum | base64 | head -c 20`
 
-    sed -i -e "s/DISCOURSE_DB_PASSWORD: SOME_SECRET/DISCOURSE_DB_PASSWORD: $DISCOURSE_DB_PASSWORD/w $changelog" $web_file
+    sed -i -e "s/BAMZOOKA_DB_PASSWORD: SOME_SECRET/BAMZOOKA_DB_PASSWORD: $BAMZOOKA_DB_PASSWORD/w $changelog" $web_file
     if  [ -s $changelog ]
     then
       rm $changelog
     else
-      echo "Problem changing DISCOURSE_DB_PASSWORD" in $web_file
+      echo "Problem changing BAMZOOKA_DB_PASSWORD" in $web_file
     fi
 
     cp -v $data_template $data_file
     quote=\'
-    sed -i -e "s/password ${quote}SOME_SECRET${quote}/password '$DISCOURSE_DB_PASSWORD'/w $changelog" $data_file
+    sed -i -e "s/password ${quote}SOME_SECRET${quote}/password '$BAMZOOKA_DB_PASSWORD'/w $changelog" $data_file
     if  [ -s $changelog ]
     then
       rm $changelog
     else
-      echo "Problem changing DISCOURSE_DB_PASSWORD" in $data_file
+      echo "Problem changing BAMZOOKA_DB_PASSWORD" in $data_file
     fi
   fi
 fi
