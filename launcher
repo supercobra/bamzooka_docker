@@ -23,6 +23,8 @@ usage () {
   exit 1
 }
 
+set +x
+
 # for potential re-exec later
 SAVED_ARGV=("$@")
 
