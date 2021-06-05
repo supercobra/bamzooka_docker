@@ -4,10 +4,10 @@ require 'pty'
 require 'optparse'
 
 images = {
-  base: { name: 'base', tag: "discourse/base:build", squash: true },
-  discourse_test_build: { name: 'discourse_test', tag: "discourse/discourse_test:build", squash: false},
-  discourse_test_public: { name: 'discourse_test', tag: "discourse/discourse_test:release", squash: true, extra_args: ' --build-arg tag=release '},
-  discourse_dev: { name: 'discourse_dev', tag: "discourse/discourse_dev:build", squash: false },
+  base: { name: 'base', tag: "bamzooka/base:build", squash: true },
+  bamzooka_test_build: { name: 'bamzooka_test', tag: "bamzooka/bamzooka_test:build", squash: false},
+  bamzooka_test_public: { name: 'bamzooka_test', tag: "bamzooka/bamzooka_test:release", squash: true, extra_args: ' --build-arg tag=release '},
+  bamzooka_dev: { name: 'bamzooka_dev', tag: "bamzooka/bamzooka_dev:build", squash: false },
 }
 
 def run(command)
@@ -32,14 +32,14 @@ def build(image)
 end
 
 def dev_deps()
-  run("sed -e 's/\(db_name: discourse\)/\1_development/' ../templates/postgres.template.yml > discourse_dev/postgres.template.yml")
-  run("cp ../templates/redis.template.yml discourse_dev/redis.template.yml")
+  run("sed -e 's/\(db_name: bamzooka\)/\1_development/' ../templates/postgres.template.yml > bamzooka_dev/postgres.template.yml")
+  run("cp ../templates/redis.template.yml bamzooka_dev/redis.template.yml")
 end
 
 image = ARGV[0].intern
 raise 'Image not found' unless images.include?(image)
 
 puts "Building #{images[image]}"
-dev_deps() if image == :discourse_dev
+dev_deps() if image == :bamzooka_dev
 
 build(images[image])

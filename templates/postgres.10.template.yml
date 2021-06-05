@@ -3,8 +3,8 @@ params:
   db_shared_buffers: "256MB"
   db_work_mem: "10MB"
   db_default_text_search_config: "pg_catalog.english"
-  db_name: discourse
-  db_user: discourse
+  db_name: bamzooka
+  db_user: bamzooka
   db_checkpoint_segments: 6
   db_logging_collector: off
   db_log_min_duration_statement: 100

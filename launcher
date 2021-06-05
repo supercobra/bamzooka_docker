@@ -90,8 +90,8 @@ git_rec_version='1.8.0'
 
 config_file=containers/"$config".yml
 cidbootstrap=cids/"$config"_bootstrap.cid
-local_discourse=local_discourse
-image="discourse/base:2.0.20210528-1735"
+local_bamzooka=local_bamzooka
+image="bamzooka/base:2.0.20210528-1735"
 docker_path=`which docker.io 2> /dev/null || which docker`
 git_path=`which git`
 
@@ -194,12 +194,12 @@ check_prereqs() {
     echo "WARNING: Docker version ${test} deprecated, recommend upgrade to ${docker_rec_version} or newer."
   fi
 
-  # 4. discourse docker image is downloaded
+  # 4. bamzooka docker image is downloaded
   test=`$docker_path images | awk '{print $1 ":" $2 }' | grep "$image"`
 
   if [ -z "$test" ]; then
     echo
-    echo "WARNING: We are about to start downloading the Discourse base image"
+    echo "WARNING: We are about to start downloading the Bamzooka base image"
     echo "This process may take anywhere between a few minutes to an hour, depending on your network speed"
     echo
     echo "Please be patient"
@@ -228,7 +228,7 @@ check_prereqs() {
   if [[ "$test" =~ "working" ]] ; then : ; else
     echo "Your Docker installation is not working correctly"
     echo
-    echo "See: https://meta.discourse.org/t/docker-error-on-bootstrap/13657/18?u=sam"
+    echo "See: https://meta.bamzooka.org/t/docker-error-on-bootstrap/13657/18?u=sam"
     exit 1
   fi
 
@@ -444,14 +444,14 @@ fi
   $docker_path container prune --filter until=1h
   $docker_path image prune --all --filter until=1h
 
-  if [ -d /var/discourse/shared/standalone/postgres_data_old ]; then
+  if [ -d /var/bamzooka/shared/standalone/postgres_data_old ]; then
     echo
-    echo "Old PostgreSQL backup data cluster detected taking up $(du -hs /var/discourse/shared/standalone/postgres_data_old | awk '{print $1}') detected"
+    echo "Old PostgreSQL backup data cluster detected taking up $(du -hs /var/bamzooka/shared/standalone/postgres_data_old | awk '{print $1}') detected"
     read -p "Would you like to remove it? (y/N): " -n 1 -r && echo
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-      echo "removing old PostgreSQL data cluster at /var/discourse/shared/standalone/postgres_data_old..."
-      rm -rf /var/discourse/shared/standalone/postgres_data_old*
+      echo "removing old PostgreSQL data cluster at /var/bamzooka/shared/standalone/postgres_data_old..."
+      rm -rf /var/bamzooka/shared/standalone/postgres_data_old*
     else
       exit 1
     fi
@@ -489,7 +489,7 @@ run_stop() {
        )
      else
        echo "$config was not started !"
-       echo "./discourse-doctor may help diagnose the problem."
+       echo "./bamzooka-doctor may help diagnose the problem."
        exit 1
   fi
 }
@@ -501,7 +501,7 @@ set_run_image() {
   if [ -n "$user_run_image" ]; then
     run_image=$user_run_image
   elif [ -z "$run_image" ]; then
-    run_image="$local_discourse/$config"
+    run_image="$local_bamzooka/$config"
   fi
 }
 
@@ -564,7 +564,7 @@ run_start() {
    # get hostname and settings from container configuration
    for envar in "${env[@]}"
    do
-     if [[ $envar == DOCKER_USE_HOSTNAME* ]] || [[ $envar == DISCOURSE_HOSTNAME* ]]
+     if [[ $envar == DOCKER_USE_HOSTNAME* ]] || [[ $envar == BAMZOOKA_HOSTNAME* ]]
      then
        # use as environment variable
        eval $envar
@@ -576,7 +576,7 @@ run_start() {
      # overwrite hostname
      if [ "$DOCKER_USE_HOSTNAME" = "true" ]
      then
-       hostname=$DISCOURSE_HOSTNAME
+       hostname=$BAMZOOKA_HOSTNAME
      else
        hostname=$hostname-$config
      fi
@@ -673,20 +673,20 @@ run_bootstrap() {
 
   if [[ $FAILED = "TRUE" ]]; then
     if [[ ! -z "$DEBUG" ]]; then
-      $docker_path commit `cat $cidbootstrap` $local_discourse/$config-debug || echo 'FAILED TO COMMIT'
-      echo "** DEBUG ** Maintaining image for diagnostics $local_discourse/$config-debug"
+      $docker_path commit `cat $cidbootstrap` $local_bamzooka/$config-debug || echo 'FAILED TO COMMIT'
+      echo "** DEBUG ** Maintaining image for diagnostics $local_bamzooka/$config-debug"
     fi
 
     $docker_path rm `cat $cidbootstrap`
     rm $cidbootstrap
     echo "** FAILED TO BOOTSTRAP ** please scroll up and look for earlier error messages, there may be more than one."
-    echo "./discourse-doctor may help diagnose the problem."
+    echo "./bamzooka-doctor may help diagnose the problem."
     exit 1
   fi
 
   sleep 5
 
-  $docker_path commit `cat $cidbootstrap` $local_discourse/$config || echo 'FAILED TO COMMIT'
+  $docker_path commit `cat $cidbootstrap` $local_bamzooka/$config || echo 'FAILED TO COMMIT'
   $docker_path rm `cat $cidbootstrap` && rm $cidbootstrap
 }
 

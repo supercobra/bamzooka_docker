@@ -1,7 +1,7 @@
 # This template adds the 'mysql2' gem for import scripts depending on it
 
 params:
-  home: /var/www/discourse
+  home: /var/www/bamzooka
 
 hooks:
   after_bundle_exec:
@@ -10,5 +10,5 @@ hooks:
         cmd:
           - echo "gem 'mysql2'" >> Gemfile
           - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y libmariadb-dev
-          - su discourse -c 'bundle config unset deployment'
-          - su discourse -c 'bundle install --no-deployment --path vendor/bundle --jobs 4 --without test development'
+          - su bamzooka -c 'bundle config unset deployment'
+          - su bamzooka -c 'bundle install --no-deployment --path vendor/bundle --jobs 4 --without test development'

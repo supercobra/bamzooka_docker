@@ -1,6 +1,6 @@
-# NAME:     discourse/discourse_dev
+# NAME:     bamzooka/bamzooka_dev
 # VERSION:  release
-FROM discourse/base:release
+FROM bamzooka/base:release
 ENV RAILS_ENV development
 
 #LABEL maintainer="Sam Saffron \"https://twitter.com/samsaffron\""
@@ -12,8 +12,8 @@ RUN apt update && apt install -y libsqlite3-dev \
 # Remove the code added on base image
 RUN rm -rf /var/www/*
 
-# Give discourse user no-passwd sudo permissions (for bundle install)
-ADD sudoers.discourse /etc/sudoers.d/discourse
+# Give bamzooka user no-passwd sudo permissions (for bundle install)
+ADD sudoers.bamzooka /etc/sudoers.d/bamzooka
 
 # get redis going
 ADD redis.template.yml /pups/redis.yml

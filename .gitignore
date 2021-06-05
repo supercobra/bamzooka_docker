@@ -13,8 +13,8 @@ image/squash.tar
 image/nsenter/nsenter
 image/docker-squash
 image/docker-squash.tar.gz
-image/discourse_dev/postgres.template.yml
-image/discourse_dev/redis.template.yml
+image/bamzooka_dev/postgres.template.yml
+image/bamzooka_dev/redis.template.yml
 .gc-state/*
 .vagrant/
 .idea/

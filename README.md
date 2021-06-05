@@ -2,15 +2,15 @@
 
 - [Docker](https://docker.com/) is an open source project to pack, ship and run any Linux application in a lighter weight, faster container than a traditional virtual machine.
 
-- Docker makes it much easier to deploy [a Discourse forum](https://github.com/discourse/discourse) on your servers and keep it updated. For background, see [Sam's blog post](http://samsaffron.com/archive/2013/11/07/discourse-in-a-docker-container).
+- Docker makes it much easier to deploy [a Bamzooka forum](https://github.com/bamzooka/bamzooka) on your servers and keep it updated. For background, see [Sam's blog post](http://samsaffron.com/archive/2013/11/07/bamzooka-in-a-docker-container).
 
-- The templates and base image configure Discourse with the Discourse team's recommended optimal defaults.
+- The templates and base image configure Bamzooka with the Bamzooka team's recommended optimal defaults.
 
 ### Getting Started
 
 The simplest way to get started is via the **standalone** template, which can be installed in 30 minutes or less. For detailed install instructions, see
 
-https://github.com/discourse/discourse/blob/master/docs/INSTALL-cloud.md
+https://github.com/bamzooka/bamzooka/blob/master/docs/INSTALL-cloud.md
 
 ### Directory Structure
 
@@ -20,7 +20,7 @@ Contains container ids for currently running Docker containers. cids are Docker'
 
 #### `/containers`
 
-This directory is for container definitions for your various Discourse containers. You are in charge of this directory, it ships empty.
+This directory is for container definitions for your various Bamzooka containers. You are in charge of this directory, it ships empty.
 
 #### `/samples`
 
@@ -28,7 +28,7 @@ Sample container definitions you may use to bootstrap your environment. You can 
 
 #### `/shared`
 
-Placeholder spot for shared volumes with various Discourse containers. You may elect to store certain persistent information outside of a container, in our case we keep various logfiles and upload directory outside. This allows you to rebuild containers easily without losing important information. Keeping uploads outside of the container allows you to share them between multiple web instances.
+Placeholder spot for shared volumes with various Bamzooka containers. You may elect to store certain persistent information outside of a container, in our case we keep various logfiles and upload directory outside. This allows you to rebuild containers easily without losing important information. Keeping uploads outside of the container allows you to share them between multiple web instances.
 
 #### `/templates`
 
@@ -36,9 +36,9 @@ Placeholder spot for shared volumes with various Discourse containers. You may e
 
 #### `/image`
 
-Dockerfiles for Discourse; see [the README](image/README.md) for further details.
+Dockerfiles for Bamzooka; see [the README](image/README.md) for further details.
 
-The Docker repository will always contain the latest built version at: https://hub.docker.com/r/discourse/base/, you should not need to build the base image.
+The Docker repository will always contain the latest built version at: https://hub.docker.com/r/bamzooka/base/, you should not need to build the base image.
 
 ### Launcher
 
@@ -90,7 +90,7 @@ Publish port 22 inside the container on port 2222 on ALL local host interfaces. 
 ```yaml
 volumes:
   - volume:
-      host: /var/discourse/shared
+      host: /var/bamzooka/shared
       guest: /shared
 
 ```
@@ -117,11 +117,11 @@ Setting environment variables to the current container.
 # app.yml
 
 env:
-  DISCOURSE_DB_HOST: some-host
-  DISCOURSE_DB_NAME: "{{config}}_discourse"
+  BAMZOOKA_DB_HOST: some-host
+  BAMZOOKA_DB_NAME: "{{config}}_bamzooka"
 ```
 
-The above will add `-e DISCOURSE_DB_HOST=some-host -e DISCOURSE_DB_NAME=app_discourse` to the options when running the container.
+The above will add `-e BAMZOOKA_DB_HOST=some-host -e BAMZOOKA_DB_NAME=app_bamzooka` to the options when running the container.
 
 #### labels:
 
@@ -130,13 +130,13 @@ The above will add `-e DISCOURSE_DB_HOST=some-host -e DISCOURSE_DB_NAME=app_disc
 
 labels:
   monitor: "true"
-  app_name: "{{config}}_discourse"
+  app_name: "{{config}}_bamzooka"
 ```
 
-Add labels to the current container. The above will add `--l monitor=true -l app_name=dev_discourse` to the options
+Add labels to the current container. The above will add `--l monitor=true -l app_name=dev_bamzooka` to the options
 when running the container
 
-### Upgrading Discourse
+### Upgrading Bamzooka
 
 The Docker setup gives you multiple upgrade options:
 
@@ -147,23 +147,23 @@ The Docker setup gives you multiple upgrade options:
 
 ### Single Container vs. Multiple Container
 
-The samples directory contains a standalone template. This template bundles all of the software required to run Discourse into a single container. The advantage is that it is easy.
+The samples directory contains a standalone template. This template bundles all of the software required to run Bamzooka into a single container. The advantage is that it is easy.
 
 The multiple container configuration setup is far more flexible and robust, however it is also more complicated to set up. A multiple container setup allows you to:
 
-- Minimize downtime when upgrading to new versions of Discourse. You can bootstrap new web processes while your site is running and only after it is built, switch the new image in.
+- Minimize downtime when upgrading to new versions of Bamzooka. You can bootstrap new web processes while your site is running and only after it is built, switch the new image in.
 - Scale your forum to multiple servers.
 - Add servers for redundancy.
 - Have some required services (e.g. the database) run on beefier hardware.
 
-If you want a multiple container setup, see the `data.yml` and `web_only.yml` templates in the samples directory. To ease this process, `launcher` will inject an env var called `DISCOURSE_HOST_IP` which will be available inside the image.
+If you want a multiple container setup, see the `data.yml` and `web_only.yml` templates in the samples directory. To ease this process, `launcher` will inject an env var called `BAMZOOKA_HOST_IP` which will be available inside the image.
 
 WARNING: In a multiple container configuration, *make sure* you setup iptables or some other firewall to protect various ports (for postgres/redis).
 On Ubuntu, install the `ufw` or `iptables-persistent` package to manage firewall rules.
 
 ### Email
 
-For a Discourse instance to function properly Email must be set up. Use the `SMTP_URL` env var to set your SMTP address, see sample templates for an example. The Docker image does not contain postfix, exim or another MTA, it was omitted because it is very tricky to set up correctly.
+For a Bamzooka instance to function properly Email must be set up. Use the `SMTP_URL` env var to set your SMTP address, see sample templates for an example. The Docker image does not contain postfix, exim or another MTA, it was omitted because it is very tricky to set up correctly.
 
 ### Troubleshooting
 
@@ -189,15 +189,15 @@ env:
 Directory permissions in Linux are UID/GID based, if your numeric IDs on the
 host do not match the IDs in the guest, permissions will mismatch. On clean
 installs you can ensure they are in sync by looking at `/etc/passwd` and
-`/etc/group`, the Discourse account will have UID 1000.
+`/etc/group`, the Bamzooka account will have UID 1000.
 
 
 ### Advanced topics
 
-- [Setting up SSL with Discourse Docker](https://meta.discourse.org/t/allowing-ssl-for-your-discourse-docker-setup/13847)
-- [Multisite configuration with Docker](https://meta.discourse.org/t/multisite-configuration-with-docker/14084)
-- [Linking containers for a multiple container setup](https://meta.discourse.org/t/linking-containers-for-a-multiple-container-setup/20867)
-- [Using Rubygems mirror to improve connection problem in China](https://meta.discourse.org/t/replace-rubygems-org-with-taobao-mirror-to-resolve-network-error-in-china/21988/1)
+- [Setting up SSL with Bamzooka Docker](https://meta.bamzooka.org/t/allowing-ssl-for-your-bamzooka-docker-setup/13847)
+- [Multisite configuration with Docker](https://meta.bamzooka.org/t/multisite-configuration-with-docker/14084)
+- [Linking containers for a multiple container setup](https://meta.bamzooka.org/t/linking-containers-for-a-multiple-container-setup/20867)
+- [Using Rubygems mirror to improve connection problem in China](https://meta.bamzooka.org/t/replace-rubygems-org-with-taobao-mirror-to-resolve-network-error-in-china/21988/1)
 
 License
 ===

@@ -12,8 +12,8 @@ run:
         
         echo CloudFlare IPs:
         echo $(echo | sed "/^/a $CONTENTS")
-        # Insert into discourse.conf
-        sed -i "/sendfile on;/a $CONTENTS\nreal_ip_header CF-Connecting-IP;" /etc/nginx/conf.d/discourse.conf
+        # Insert into bamzooka.conf
+        sed -i "/sendfile on;/a $CONTENTS\nreal_ip_header CF-Connecting-IP;" /etc/nginx/conf.d/bamzooka.conf
         # Clean up
         rm /tmp/cloudflare-ips
 

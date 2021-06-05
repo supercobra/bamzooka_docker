@@ -1,6 +1,6 @@
-# NAME:     discourse/discourse_bench
+# NAME:     bamzooka/bamzooka_bench
 # VERSION:  1.4.0
-FROM discourse/discourse_test:1.4.0
+FROM bamzooka/bamzooka_test:1.4.0
 ENV RAILS_ENV profile
 
 #LABEL maintainer="Gerhard Schlager <mail@gerhard-schlager.at>"
@@ -13,7 +13,7 @@ RUN git config --global user.email "you@example.com" &&\
     git config --global user.name "Your Name"
 
 RUN git pull &&\
-    sudo -u discourse bundle install --standalone
+    sudo -u bamzooka bundle install --standalone
 
 RUN gem install facter &&\
     gem install mailcatcher
@@ -23,10 +23,10 @@ RUN gem install facter &&\
 RUN pg_dropcluster --stop 9.5 main &&\
     pg_createcluster --start -e UTF-8 9.5 main
 
-# create role "discourse"
+# create role "bamzooka"
 RUN /etc/init.d/postgresql start &&\
     sleep 5 &&\
-    sudo -u postgres createuser --superuser discourse
+    sudo -u postgres createuser --superuser bamzooka
 
 ADD run_bench.sh /tmp/run_bench.sh
 RUN chmod +x /tmp/run_bench.sh

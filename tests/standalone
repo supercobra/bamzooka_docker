@@ -28,7 +28,7 @@ smtp_pass='smtp-pw'
 notification=''
 letsencrypt='le@myhost.com'
 maxmind=''
-$DIR/../discourse-setup --skip-connection-test --skip-rebuild <<EOF 
+$DIR/../bamzooka-setup --skip-connection-test --skip-rebuild <<EOF
 $hostname
 $developer
 $smtp_address
@@ -41,13 +41,13 @@ $maxmind
 
 
 EOF
-check_value DISCOURSE_HOSTNAME $hostname $YML
-check_value DISCOURSE_SMTP_ADDRESS $smtp_address $YML
-check_value DISCOURSE_SMTP_PORT 587 $YML
-check_value DISCOURSE_SMTP_USER_NAME $smtp_user $YML
-check_value DISCOURSE_SMTP_PASSWORD \"$smtp_pass\" $YML
-check_value DISCOURSE_SMTP_DOMAIN $hostname $YML
-check_value DISCOURSE_NOTIFICATION_EMAIL noreply@$hostname $YML
+check_value BAMZOOKA_HOSTNAME $hostname $YML
+check_value BAMZOOKA_SMTP_ADDRESS $smtp_address $YML
+check_value BAMZOOKA_SMTP_PORT 587 $YML
+check_value BAMZOOKA_SMTP_USER_NAME $smtp_user $YML
+check_value BAMZOOKA_SMTP_PASSWORD \"$smtp_pass\" $YML
+check_value BAMZOOKA_SMTP_DOMAIN $hostname $YML
+check_value BAMZOOKA_NOTIFICATION_EMAIL noreply@$hostname $YML
 echo "################################ Initial install succeeded. ###################################"
 echo "Now running edit test."
 hostname='new.myhost.com'
@@ -60,7 +60,7 @@ notification='somuser@otherhost.com'
 smtp_domain=otherhost.com # NOTE: script uses notification hostnme
 letsencrypt='le-new@myhost.com'
 maxmind='maxthisone'
-$DIR/../discourse-setup --skip-connection-test --skip-rebuild <<EOF 
+$DIR/../bamzooka-setup --skip-connection-test --skip-rebuild <<EOF
 $hostname
 $developer
 $smtp_address
@@ -73,13 +73,13 @@ $maxmind
 
 
 EOF
-check_value DISCOURSE_HOSTNAME $hostname $YML
-check_value DISCOURSE_SMTP_ADDRESS $smtp_address $YML
-check_value DISCOURSE_SMTP_PORT $smtp_port $YML
-check_value DISCOURSE_SMTP_USER_NAME $smtp_user $YML
-check_value DISCOURSE_SMTP_PASSWORD \"$smtp_pass\" $YML
-check_value DISCOURSE_SMTP_DOMAIN $smtp_domain $YML
-check_value DISCOURSE_NOTIFICATION_EMAIL $notification $YML
+check_value BAMZOOKA_HOSTNAME $hostname $YML
+check_value BAMZOOKA_SMTP_ADDRESS $smtp_address $YML
+check_value BAMZOOKA_SMTP_PORT $smtp_port $YML
+check_value BAMZOOKA_SMTP_USER_NAME $smtp_user $YML
+check_value BAMZOOKA_SMTP_PASSWORD \"$smtp_pass\" $YML
+check_value BAMZOOKA_SMTP_DOMAIN $smtp_domain $YML
+check_value BAMZOOKA_NOTIFICATION_EMAIL $notification $YML
 echo "################################ Update of values succeeded. ###################################"
 echo "Removing $YML*"
 rm $YML*

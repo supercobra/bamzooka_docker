@@ -7,4 +7,4 @@ hooks:
   before_bundle_exec:
     - exec:
        cmd:
-         - su discourse -c 'bundle config mirror.https://rubygems.org https://gems.ruby-china.com/'
+         - su bamzooka -c 'bundle config mirror.https://rubygems.org https://gems.ruby-china.com/'

@@ -3,22 +3,22 @@ run:
      cmd:
        - "mkdir -p /shared/ssl/"
   - replace:
-     filename: "/etc/nginx/conf.d/discourse.conf"
+     filename: "/etc/nginx/conf.d/bamzooka.conf"
      from: /server.+{/
      to: |
        server {
          listen 80;
-         return 301 https://$$ENV_DISCOURSE_HOSTNAME$request_uri;
+         return 301 https://$$ENV_BAMZOOKA_HOSTNAME$request_uri;
        }
        server {
   - replace:
-     filename: "/etc/nginx/conf.d/discourse.conf"
+     filename: "/etc/nginx/conf.d/bamzooka.conf"
      from: /listen 80;\s+gzip on;/m
      to: |
        listen 443 ssl http2;
        SSL_TEMPLATE_SSL_BLOCK
   - replace:
-     filename: "/etc/nginx/conf.d/discourse.conf"
+     filename: "/etc/nginx/conf.d/bamzooka.conf"
      from: /listen 80;\s+listen \[::\]:80;\s+gzip on;/m
      to: |
        listen 443 ssl http2;
@@ -26,7 +26,7 @@ run:
        SSL_TEMPLATE_SSL_BLOCK
   - replace:
      hook: ssl
-     filename: "/etc/nginx/conf.d/discourse.conf"
+     filename: "/etc/nginx/conf.d/bamzooka.conf"
      from: /SSL_TEMPLATE_SSL_BLOCK/
      to: |
 
@@ -45,12 +45,12 @@ run:
 
        add_header Strict-Transport-Security 'max-age=31536000'; # remember the certificate for a year and automatically connect to HTTPS for this domain
 
-       if ($http_host != $$ENV_DISCOURSE_HOSTNAME) {
-          rewrite (.*) https://$$ENV_DISCOURSE_HOSTNAME$1 permanent;
+       if ($http_host != $$ENV_BAMZOOKA_HOSTNAME) {
+          rewrite (.*) https://$$ENV_BAMZOOKA_HOSTNAME$1 permanent;
        }
   - replace:
-     filename: "/etc/nginx/conf.d/discourse.conf"
-     from: "location @discourse {"
+     filename: "/etc/nginx/conf.d/bamzooka.conf"
+     from: "location @bamzooka {"
      to: |
-       location @discourse {
+       location @bamzooka {
        add_header Strict-Transport-Security 'max-age=31536000'; # remember the certificate for a year and automatically connect to HTTPS for this domain

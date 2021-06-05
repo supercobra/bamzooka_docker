@@ -1,7 +1,7 @@
 ﻿# NAME:     bamzooka/base
 # VERSION:  release
-# CREDIT: discourse docker project
-# https://github.com/discourse/discourse_docker
+# CREDIT: bamzooka docker project
+# https://github.com/bamzooka/bamzooka_docker
 FROM debian:buster-slim
 
 ENV PG_MAJOR 13
@@ -70,8 +70,9 @@ RUN cd / &&\
 ADD install-nginx /tmp/install-nginx
 RUN /tmp/install-nginx
 
-ADD install-mysql /tmp/install-mysql
-RUN /tmp/install-mysql
+# Install Mysql
+#ADD install-mysql /tmp/install-mysql
+#RUN /tmp/install-mysql
 
 RUN apt -y install advancecomp jhead jpegoptim libjpeg-turbo-progs optipng
 

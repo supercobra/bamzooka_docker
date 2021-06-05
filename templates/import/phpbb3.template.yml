@@ -1,7 +1,7 @@
 # This template installs MariaDB and all dependencies needed for importing from phpBB3.
 
 params:
-  home: /var/www/discourse
+  home: /var/www/bamzooka
 
 hooks:
   after_web_config:
@@ -72,8 +72,8 @@ hooks:
           #!/bin/bash
           set -e
 
-          chown discourse /shared/import/settings.yml
-          chown discourse -R /shared/import/data
+          chown bamzooka /shared/import/settings.yml
+          chown bamzooka -R /shared/import/data
 
           # Allow connection as root user without password
           mysql -uroot -e "UPDATE mysql.user SET plugin = 'mysql_native_password' WHERE user = 'root' AND plugin = 'unix_socket'"
@@ -99,13 +99,13 @@ hooks:
           cd $home
           echo "The phpBB3 import is starting..."
           echo
-          su discourse -c 'bundle exec ruby script/import_scripts/phpbb3.rb /shared/import/settings.yml'
+          su bamzooka -c 'bundle exec ruby script/import_scripts/phpbb3.rb /shared/import/settings.yml'
 
     - exec:
         cd: $home
         cmd:
           - mkdir -p /shared/import/data
-          - chown discourse -R /shared/import
+          - chown bamzooka -R /shared/import
           - cp -n script/import_scripts/phpbb3/settings.yml /shared/import/settings.yml
 
   after_bundle_exec:
@@ -114,5 +114,5 @@ hooks:
         cmd:
           - echo "gem 'mysql2'" >> Gemfile
           - echo "gem 'ruby-bbcode-to-md', :github => 'nlalonde/ruby-bbcode-to-md'" >> Gemfile
-          - su discourse -c 'bundle config unset deployment'
-          - su discourse -c 'bundle install --no-deployment --path vendor/bundle --jobs 4 --without test development'
+          - su bamzooka -c 'bundle config unset deployment'
+          - su bamzooka -c 'bundle install --no-deployment --path vendor/bundle --jobs 4 --without test development'

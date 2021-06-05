@@ -1,21 +1,21 @@
-# NAME:     discourse/discourse_test
+# NAME:     bamzooka/bamzooka_test
 # VERSION:  release
 ARG tag=build
-FROM discourse/base:$tag
+FROM bamzooka/base:$tag
 ENV RAILS_ENV test
 
 MAINTAINER Sam Saffron "https://twitter.com/samsaffron"
 
 # configure Git to suppress warnings
-RUN sudo -E -u discourse -H git config --global user.email "you@example.com" &&\
-    sudo -E -u discourse -H git config --global user.name "Your Name"
+RUN sudo -E -u bamzooka -H git config --global user.email "you@example.com" &&\
+    sudo -E -u bamzooka -H git config --global user.name "Your Name"
 
 RUN gem update bundler --force &&\
-      cd /var/www/discourse &&\
-      chown -R discourse . &&\
+      cd /var/www/bamzooka &&\
+      chown -R bamzooka . &&\
       rm -fr .bundle &&\
-      sudo -u discourse git pull &&\
-      sudo -u discourse bundle install --standalone --jobs=4
+      sudo -u bamzooka git pull &&\
+      sudo -u bamzooka bundle install --standalone --jobs=4
 
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - &&\
     echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list &&\
@@ -24,12 +24,12 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo ap
     apt update &&\
     apt install -y libgconf-2-4 libxss1 google-chrome-stable yarn nodejs &&\
     npm install -g eslint babel-eslint &&\
-    cd /var/www/discourse && sudo -E -u discourse -H yarn install
+    cd /var/www/bamzooka && sudo -E -u bamzooka -H yarn install
 
-RUN cd /var/www/discourse && sudo -E -u discourse -H bundle exec rake plugin:install_all_official &&\
-    sudo -E -u discourse -H bundle exec rake plugin:install_all_gems &&\
-    chown -R discourse /var/run/postgresql
+RUN cd /var/www/bamzooka && sudo -E -u bamzooka -H bundle exec rake plugin:install_all_official &&\
+    sudo -E -u bamzooka -H bundle exec rake plugin:install_all_gems &&\
+    chown -R bamzooka /var/run/postgresql
 
-WORKDIR /var/www/discourse
+WORKDIR /var/www/bamzooka
 ENV LANG en_US.UTF-8
-ENTRYPOINT sudo -E -u discourse -H ruby script/docker_test.rb
+ENTRYPOINT sudo -E -u bamzooka -H ruby script/docker_test.rb

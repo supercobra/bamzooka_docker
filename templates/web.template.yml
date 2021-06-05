@@ -11,23 +11,23 @@ env:
   RUBY_GC_HEAP_INIT_SLOTS: 400000
   RUBY_GC_HEAP_OLDOBJECT_LIMIT_FACTOR: 1.5
 
-  DISCOURSE_DB_SOCKET: /var/run/postgresql
-  DISCOURSE_DB_HOST:
-  DISCOURSE_DB_PORT:
+  BAMZOOKA_DB_SOCKET: /var/run/postgresql
+  BAMZOOKA_DB_HOST:
+  BAMZOOKA_DB_PORT:
 
 
 params:
   version: tests-passed
 
-  home: /var/www/discourse
+  home: /var/www/bamzooka
   upload_size: 10m
 
 run:
   - exec: thpoff echo "thpoff is installed!"
-  - exec: /usr/local/bin/ruby -e 'if ENV["DISCOURSE_SMTP_ADDRESS"] == "smtp.example.com"; puts "Aborting! Mail is not configured!"; exit 1; end'
-  - exec: /usr/local/bin/ruby -e 'if ENV["DISCOURSE_HOSTNAME"] == "discourse.example.com"; puts "Aborting! Domain is not configured!"; exit 1; end'
-  - exec: /usr/local/bin/ruby -e 'if (ENV["DISCOURSE_CDN_URL"] || "")[0..1] == "//"; puts "Aborting! CDN must have a protocol specified. Once fixed you should rebake your posts now to correct all posts."; exit 1; end'
-  - exec: chown -R discourse /home/discourse
+  - exec: /usr/local/bin/ruby -e 'if ENV["BAMZOOKA_SMTP_ADDRESS"] == "smtp.example.com"; puts "Aborting! Mail is not configured!"; exit 1; end'
+  - exec: /usr/local/bin/ruby -e 'if ENV["BAMZOOKA_HOSTNAME"] == "bamzooka.example.com"; puts "Aborting! Domain is not configured!"; exit 1; end'
+  - exec: /usr/local/bin/ruby -e 'if (ENV["BAMZOOKA_CDN_URL"] || "")[0..1] == "//"; puts "Aborting! CDN must have a protocol specified. Once fixed you should rebake your posts now to correct all posts."; exit 1; end'
+  - exec: chown -R bamzooka /home/bamzooka
   # TODO: move to base image (anacron can not be fired up using rc.d)
   - exec: rm -f /etc/cron.d/anacron
   - file:
@@ -43,10 +43,10 @@ run:
      contents: |
         #!/bin/bash
         env > ~/boot_env
-        conf=/var/www/discourse/config/discourse.conf
+        conf=/var/www/bamzooka/config/bamzooka.conf
 
-        # find DISCOURSE_ env vars, strip the leader, lowercase the key
-        /usr/local/bin/ruby -e 'ENV.each{|k,v| puts "#{$1.downcase} = '\''#{v}'\''" if k =~ /^DISCOURSE_(.*)/}' > $conf
+        # find BAMZOOKA_ env vars, strip the leader, lowercase the key
+        /usr/local/bin/ruby -e 'ENV.each{|k,v| puts "#{$1.downcase} = '\''#{v}'\''" if k =~ /^BAMZOOKA_(.*)/}' > $conf
 
   - file:
      path: /etc/service/unicorn/run
@@ -57,8 +57,8 @@ run:
         # redis
         # postgres
         cd $home
-        chown -R discourse:www-data /shared/log/rails
-        LD_PRELOAD=$RUBY_ALLOCATOR HOME=/home/discourse USER=discourse exec thpoff chpst -u discourse:www-data -U discourse:www-data bundle exec config/unicorn_launcher -E production -c config/unicorn.conf.rb
+        chown -R bamzooka:www-data /shared/log/rails
+        LD_PRELOAD=$RUBY_ALLOCATOR HOME=/home/bamzooka USER=bamzooka exec thpoff chpst -u bamzooka:www-data -U bamzooka:www-data bundle exec config/unicorn_launcher -E production -c config/unicorn.conf.rb
 
   - file:
      path: /etc/service/nginx/run
@@ -93,7 +93,7 @@ run:
         - git fetch --depth 1 origin $version
         - git checkout $version
         - mkdir -p tmp
-        - chown discourse:www-data tmp
+        - chown bamzooka:www-data tmp
         - mkdir -p tmp/pids
         - mkdir -p tmp/sockets
         - touch tmp/.gitkeep
@@ -104,13 +104,13 @@ run:
         - bash -c "ln    -s           /shared/{uploads,backups} $home/public"
         - bash -c "mkdir -p           /shared/tmp/{backups,restores}"
         - bash -c "ln    -s           /shared/tmp/{backups,restores} $home/tmp"
-        - chown -R discourse:www-data /shared/log/rails /shared/uploads /shared/backups /shared/tmp
+        - chown -R bamzooka:www-data /shared/log/rails /shared/uploads /shared/backups /shared/tmp
         # scrub broken symlinks from plugins that have been removed
         - find public/plugins/ -maxdepth 1 -xtype l -delete
 
   - exec:
       cmd:
-        - "cp $home/config/nginx.sample.conf /etc/nginx/conf.d/discourse.conf"
+        - "cp $home/config/nginx.sample.conf /etc/nginx/conf.d/bamzooka.conf"
         - "rm /etc/nginx/sites-enabled/default"
         - "mkdir -p /var/nginx/cache"
 
@@ -120,19 +120,19 @@ run:
       to: daemon off;
 
   - replace:
-      filename: "/etc/nginx/conf.d/discourse.conf"
+      filename: "/etc/nginx/conf.d/bamzooka.conf"
       from: /upstream[^\}]+\}/m
-      to: "upstream discourse {
+      to: "upstream bamzooka {
         server 127.0.0.1:3000;
       }"
 
   - replace:
-      filename: "/etc/nginx/conf.d/discourse.conf"
+      filename: "/etc/nginx/conf.d/bamzooka.conf"
       from: /server_name.+$/
       to: server_name _ ;
 
   - replace:
-      filename: "/etc/nginx/conf.d/discourse.conf"
+      filename: "/etc/nginx/conf.d/bamzooka.conf"
       from: /client_max_body_size.+$/
       to: client_max_body_size $upload_size ;
 
@@ -146,37 +146,37 @@ run:
       cmd:
         # install bundler version to match Gemfile.lock
         - gem install bundler --conservative -v $(awk '/BUNDLED WITH/ { getline; gsub(/ /,""); print $0 }' Gemfile.lock)
-        - find $home ! -user discourse -exec chown discourse {} \+
+        - find $home ! -user bamzooka -exec chown bamzooka {} \+
 
   - exec:
       cd: $home
       hook: bundle_exec
       cmd:
-        - su discourse -c 'bundle install --deployment --retry 3 --jobs 4 --verbose --without test development'
+        - su bamzooka -c 'bundle install --deployment --retry 3 --jobs 4 --verbose --without test development'
 
   - exec:
       cd: $home
       cmd:
-        - su discourse -c 'bundle exec rake plugin:pull_compatible_all'
+        - su bamzooka -c 'bundle exec rake plugin:pull_compatible_all'
       raise_on_fail: false
 
   - exec:
       cd: $home
       hook: db_migrate
       cmd:
-        - su discourse -c 'bundle exec rake db:migrate'
+        - su bamzooka -c 'bundle exec rake db:migrate'
   - exec:
       cd: $home
       hook: assets_precompile
       cmd:
-        - su discourse -c 'bundle exec rake themes:update assets:precompile'
+        - su bamzooka -c 'bundle exec rake themes:update assets:precompile'
 
   - file:
-     path: /usr/local/bin/discourse
+     path: /usr/local/bin/bamzooka
      chmod: +x
      contents: |
        #!/bin/bash
-       (cd /var/www/discourse && RAILS_ENV=production sudo -H -E -u discourse bundle exec script/discourse "$@")
+       (cd /var/www/bamzooka && RAILS_ENV=production sudo -H -E -u bamzooka bundle exec script/bamzooka "$@")
 
   - file:
      path: /usr/local/bin/rails
@@ -186,9 +186,9 @@ run:
        # If they requested a console, load pry instead
        if [ "$*" == "c" -o "$*" == "console" ]
        then
-        (cd /var/www/discourse && RAILS_ENV=production sudo -H -E -u discourse bundle exec pry -r ./config/environment)
+        (cd /var/www/bamzooka && RAILS_ENV=production sudo -H -E -u bamzooka bundle exec pry -r ./config/environment)
        else
-        (cd /var/www/discourse && RAILS_ENV=production sudo -H -E -u discourse bundle exec script/rails "$@")
+        (cd /var/www/bamzooka && RAILS_ENV=production sudo -H -E -u bamzooka bundle exec script/rails "$@")
        fi
 
   - file:
@@ -196,21 +196,21 @@ run:
      chmod: +x
      contents: |
        #!/bin/bash
-       (cd /var/www/discourse && RAILS_ENV=production sudo -H -E -u discourse bundle exec bin/rake "$@")
+       (cd /var/www/bamzooka && RAILS_ENV=production sudo -H -E -u bamzooka bundle exec bin/rake "$@")
 
   - file:
      path: /usr/local/bin/rbtrace
      chmod: +x
      contents: |
        #!/bin/bash
-       (cd /var/www/discourse && RAILS_ENV=production sudo -H -E -u discourse bundle exec rbtrace "$@")
+       (cd /var/www/bamzooka && RAILS_ENV=production sudo -H -E -u bamzooka bundle exec rbtrace "$@")
 
   - file:
      path: /usr/local/bin/stackprof
      chmod: +x
      contents: |
        #!/bin/bash
-       (cd /var/www/discourse && RAILS_ENV=production sudo -H -E -u discourse bundle exec stackprof "$@")
+       (cd /var/www/bamzooka && RAILS_ENV=production sudo -H -E -u bamzooka bundle exec stackprof "$@")
 
   - file:
      path: /etc/update-motd.d/10-web
@@ -218,7 +218,7 @@ run:
      contents: |
        #!/bin/bash
        echo
-       echo Use: rails, rake or discourse to execute commands in production
+       echo Use: rails, rake or bamzooka to execute commands in production
        echo
 
   - file:
@@ -275,27 +275,27 @@ run:
         fi
         if [[ ! -d /shared/log/rails ]]; then
           mkdir -p /shared/log/rails
-          chown -R discourse:www-data /shared/log/rails
+          chown -R bamzooka:www-data /shared/log/rails
         fi
         if [[ ! -d /shared/uploads ]]; then
           mkdir -p /shared/uploads
-          chown -R discourse:www-data /shared/uploads
+          chown -R bamzooka:www-data /shared/uploads
         fi
         if [[ ! -d /shared/backups ]]; then
           mkdir -p /shared/backups
-          chown -R discourse:www-data /shared/backups
+          chown -R bamzooka:www-data /shared/backups
         fi
 
         rm -rf /shared/tmp/{backups,restores}
         mkdir -p /shared/tmp/{backups,restores}
-        chown -R discourse:www-data /shared/tmp/{backups,restores}
+        chown -R bamzooka:www-data /shared/tmp/{backups,restores}
   - file:
       path: /etc/runit/1.d/01-cleanup-web-pids
       chmod: +x
       contents: |
         #!/bin/bash
-        /bin/rm -f /var/www/discourse/tmp/pids/*.pid
-  # change login directory to Discourse home
+        /bin/rm -f /var/www/bamzooka/tmp/pids/*.pid
+  # change login directory to Bamzooka home
   - file:
      path: /root/.bash_profile
      chmod: 644

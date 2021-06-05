@@ -7,7 +7,7 @@ params:
 
 run:
   - replace:
-     filename: "/etc/nginx/conf.d/discourse.conf"
+     filename: "/etc/nginx/conf.d/bamzooka.conf"
      from: /server.+{/
      to: |
        limit_req_zone $binary_remote_addr zone=flood:10m rate=$reqs_per_secondr/s;
@@ -17,10 +17,10 @@ run:
        limit_conn_status 429;
        server {
   - replace:
-     filename: "/etc/nginx/conf.d/discourse.conf"
-     from: "/location @discourse {/"
+     filename: "/etc/nginx/conf.d/bamzooka.conf"
+     from: "/location @bamzooka {/"
      to: |
-       location @discourse {
+       location @bamzooka {
          limit_conn connperip $conn_per_ip;
          limit_req zone=flood burst=$burst_per_second nodelay;
          limit_req zone=bot burst=$burst_per_minute nodelay;

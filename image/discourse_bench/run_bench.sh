@@ -10,10 +10,10 @@ redis-server /etc/redis/redis.conf
 git pull
 
 # install needed gems
-sudo -E -u discourse bundle install
+sudo -E -u bamzooka bundle install
 
 # start mailcatcher
 mailcatcher --http-ip 0.0.0.0
 
 # run the benchmark
-sudo -E -u discourse ruby script/bench.rb
+sudo -E -u bamzooka ruby script/bench.rb

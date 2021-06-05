@@ -1,6 +1,6 @@
-## Smoke tests for `discourse-setup`
+## Smoke tests for `bamzooka-setup`
 
-These are not **real** tests, but do test that `discourse-setup` can produce or modify
+These are not **real** tests, but do test that `bamzooka-setup` can produce or modify
 the YML file as expected. 
 
 Tests will not run if yml files exist already. If the tests succeed, the container files are deleted.
