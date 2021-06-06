@@ -207,7 +207,7 @@ check_prereqs() {
     echo "Please be patient"
     echo
 
-    pull_image
+    # pull_image
   fi
 
   # 5. running recommended git version
@@ -739,33 +739,29 @@ case "$command" in
   rebuild)
       if [ "$(git symbolic-ref --short HEAD)" == "master" ]; then
         echo "TODO Ensuring launcher is up to date"
-        echo "TODO Ensuring launcher is up to date"
-        echo "TODO Ensuring launcher is up to date"
-        echo "TODO Ensuring launcher is up to date"
-        echo ""
-#        git remote update
-#
-#        LOCAL=$(git rev-parse HEAD)
-#        REMOTE=$(git rev-parse @{u})
-#        BASE=$(git merge-base HEAD @{u})
-#
-#        if [ $LOCAL = $REMOTE ]; then
-#          echo "Launcher is up-to-date"
-#
-#        elif [ $LOCAL = $BASE ]; then
-#          echo "Updating Launcher..."
-#          git pull || (echo 'failed to update' && exit 1)
-#
-#          echo "Launcher updated, restarting..."
-#          exec "$0" "${SAVED_ARGV[@]}"
-#
-#        elif [ $REMOTE = $BASE ]; then
-#          echo "Your version of Launcher is ahead of origin"
-#
-#        else
-#          echo "Launcher has diverged source, this is only expected in Dev mode"
-#        fi
-#
+        git remote update
+
+        LOCAL=$(git rev-parse HEAD)
+        REMOTE=$(git rev-parse @{u})
+        BASE=$(git merge-base HEAD @{u})
+
+        if [ $LOCAL = $REMOTE ]; then
+          echo "Launcher is up-to-date"
+
+        elif [ $LOCAL = $BASE ]; then
+          echo "Updating Launcher..."
+          git pull || (echo 'failed to update' && exit 1)
+
+          echo "Launcher updated, restarting..."
+          exec "$0" "${SAVED_ARGV[@]}"
+
+        elif [ $REMOTE = $BASE ]; then
+          echo "Your version of Launcher is ahead of origin"
+
+        else
+          echo "Launcher has diverged source, this is only expected in Dev mode"
+        fi
+
       fi
 
       set_existing_container
