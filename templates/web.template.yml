@@ -17,7 +17,7 @@ env:
 
 
 params:
-  version: tests-passed
+  version: master
 
   home: /var/www/bamzooka
   upload_size: 10m
