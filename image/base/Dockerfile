@@ -25,17 +25,10 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-<<<<<<< HEAD
 RUN curl https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | \
         tee /etc/apt/sources.list.d/postgres.list
 RUN curl --silent --location https://deb.nodesource.com/setup_14.x | sudo bash -
-=======
-RUN curl https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | \
-        tee /etc/apt/sources.list.d/postgres.list
-RUN curl --silent --location https://deb.nodesource.com/setup_15.x | sudo bash -
->>>>>>> 46d899f9c10ebc0d44ced97d6f724dff295e7741
 RUN apt -y update
 # install these without recommends to avoid pulling in e.g.
 # X11 libraries, mailutils
@@ -45,8 +38,8 @@ RUN apt -y install build-essential rsync \
                        libxslt-dev libcurl4-openssl-dev \
                        libssl-dev libyaml-dev libtool \
                        libxml2-dev gawk parallel \
-                       # postgresql-${PG_MAJOR} postgresql-client-${PG_MAJOR} \
-                       # postgresql-contrib-${PG_MAJOR} libpq-dev libreadline-dev \
+                       postgresql-${PG_MAJOR} postgresql-client-${PG_MAJOR} \
+                       postgresql-contrib-${PG_MAJOR} libpq-dev libreadline-dev \
                        anacron wget \
                        psmisc vim whois brotli libunwind-dev \
                        libtcmalloc-minimal4 cmake \
@@ -95,7 +88,7 @@ RUN gem update --system
 
 RUN gem install bundler --force &&\
     rm -rf /usr/local/share/ri/2.7.2/system &&\
-    cd / && git clone https://github.com/bamzooka/pups.git
+    cd / && git clone https://github.com/discourse/pups.git
 
 ADD install-redis /tmp/install-redis
 RUN /tmp/install-redis
@@ -143,17 +136,15 @@ ADD cron /etc/service/cron/run
 ADD rsyslog /etc/service/rsyslog/run
 ADD cron.d_anacron /etc/cron.d/anacron
 
-COPY bamzooka bamzooka
-RUN mkdir -p /var/www
-RUN mv bamzooka /var/www/
-RUN useradd bamzooka -s /bin/bash -m -U &&\
- mkdir -p /var/www &&\
-    cd /var/www &&\
-    git clone --depth 1 https://github.com/supercobra/blograilspg.git bamzooka &&\
-    cd bamzooka &&\
-    git remote set-branches --add origin tests-passed &&\
-    chown -R bamzooka:bamzooka /var/www/bamzooka &&\
-    cd /var/www/bamzooka &&\
-    sudo -u bamzooka bundle install --deployment --jobs 4 --without test development &&\
-    bundle exec rake maxminddb:get &&\
-    find /var/www/bamzooka/vendor/bundle -name tmp -type d -exec rm -rf {} +
+#COPY bamzooka bamzooka
+#RUN mv bamzooka /var/www/
+RUN useradd bamzooka -s /bin/bash -m -U
+RUN   mkdir -p /var/www
+RUN   cd /var/www
+RUN   git clone --depth 1 https://github.com/supercobra/blograilspg.git /var/www/bamzooka
+# RUN   cd /var/www/bamzooka &&\
+    # git remote set-branches --add origin tests-passed &&\
+RUN       chown -R bamzooka:bamzooka /var/www/bamzooka &&\
+       cd /var/www/bamzooka &&\
+       sudo -u bamzooka bundle install --deployment --jobs 4 --without test development &&\
+       find /var/www/bamzooka/vendor/bundle -name tmp -type d -exec rm -rf {} +
