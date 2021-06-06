@@ -26,9 +26,9 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
 <<<<<<< HEAD
-#RUN curl https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
-#RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | \
-#        tee /etc/apt/sources.list.d/postgres.list
+RUN curl https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | \
+        tee /etc/apt/sources.list.d/postgres.list
 RUN curl --silent --location https://deb.nodesource.com/setup_14.x | sudo bash -
 =======
 RUN curl https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
@@ -95,7 +95,7 @@ RUN gem update --system
 
 RUN gem install bundler --force &&\
     rm -rf /usr/local/share/ri/2.7.2/system &&\
-    cd / && git clone https://github.com/discourse/pups.git
+    cd / && git clone https://github.com/bamzooka/pups.git
 
 ADD install-redis /tmp/install-redis
 RUN /tmp/install-redis
@@ -147,7 +147,13 @@ COPY bamzooka bamzooka
 RUN mkdir -p /var/www
 RUN mv bamzooka /var/www/
 RUN useradd bamzooka -s /bin/bash -m -U &&\
+ mkdir -p /var/www &&\
+    cd /var/www &&\
+    git clone --depth 1 https://github.com/supercobra/blograilspg.git bamzooka &&\
+    cd bamzooka &&\
+    git remote set-branches --add origin tests-passed &&\
     chown -R bamzooka:bamzooka /var/www/bamzooka &&\
-    cd /var/www/bamzooka &&
+    cd /var/www/bamzooka &&\
     sudo -u bamzooka bundle install --deployment --jobs 4 --without test development &&\
+    bundle exec rake maxminddb:get &&\
     find /var/www/bamzooka/vendor/bundle -name tmp -type d -exec rm -rf {} +
