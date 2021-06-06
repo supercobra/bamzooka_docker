@@ -105,8 +105,6 @@ run:
         - bash -c "mkdir -p           /shared/tmp/{backups,restores}"
         - bash -c "ln    -s           /shared/tmp/{backups,restores} $home/tmp"
         - chown -R bamzooka:www-data /shared/log/rails /shared/uploads /shared/backups /shared/tmp
-        # scrub broken symlinks from plugins that have been removed
-        - find public/plugins/ -maxdepth 1 -xtype l -delete
 
   - exec:
       cmd:
@@ -153,12 +151,6 @@ run:
       hook: bundle_exec
       cmd:
         - su bamzooka -c 'bundle install --deployment --retry 3 --jobs 4 --verbose --without test development'
-
-  - exec:
-      cd: $home
-      cmd:
-        - su bamzooka -c 'bundle exec rake plugin:pull_compatible_all'
-      raise_on_fail: false
 
   - exec:
       cd: $home
