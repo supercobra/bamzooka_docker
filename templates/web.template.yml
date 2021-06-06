@@ -169,7 +169,7 @@ run:
       cd: $home
       hook: assets_precompile
       cmd:
-        - su bamzooka -c 'bundle exec rake themes:update assets:precompile'
+        - su bamzooka -c 'bundle exec rake assets:precompile'
 
   - file:
      path: /usr/local/bin/bamzooka
