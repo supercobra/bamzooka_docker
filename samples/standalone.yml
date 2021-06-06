@@ -94,9 +94,10 @@ volumes:
 hooks:
   after_code:
     - exec:
-        cd: $home/plugins
+        cd: $home/
         cmd:
-          - git clone https://github.com/bamzooka/docker_manager.git
+          - mkdir -p plugin
+          - echo "Pluging dir ready"
 
 ## Any custom commands to run after building
 run:
