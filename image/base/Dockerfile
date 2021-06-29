@@ -139,12 +139,21 @@ ADD cron.d_anacron /etc/cron.d/anacron
 #COPY bamzooka bamzooka
 #RUN mv bamzooka /var/www/
 RUN useradd bamzooka -s /bin/bash -m -U
-RUN   mkdir -p /var/www
-RUN   cd /var/www
-RUN   git clone --depth 1 https://github.com/supercobra/blograilspg.git /var/www/bamzooka
+RUN mkdir -p /var/www
+RUN cd /var/www
+COPY metadot-workspace/apps/bamzooka-backend/ /var/www/bamzooka
+RUN mkdir -p /var/www/bamzooka/log
+# RUN   git clone --depth 1 https://github.com/supercobra/blograilspg.git /var/www/bamzooka
 # RUN   cd /var/www/bamzooka &&\
     # git remote set-branches --add origin tests-passed &&\
-RUN       chown -R bamzooka:bamzooka /var/www/bamzooka &&\
-       cd /var/www/bamzooka &&\
+
+# Yarn
+RUN npm install -g yarn
+RUN yarn install
+
+RUN chown -R bamzooka:bamzooka /var/www/bamzooka
+RUN       cd /var/www/bamzooka &&\
+##       bundle config set --local deployment 'true' &&\
+##       bundle config set --local without 'test development' &&\
        sudo -u bamzooka bundle install --deployment --jobs 4 --without test development &&\
        find /var/www/bamzooka/vendor/bundle -name tmp -type d -exec rm -rf {} +
