@@ -139,6 +139,12 @@ ADD cron.d_anacron /etc/cron.d/anacron
 #COPY bamzooka bamzooka
 #RUN mv bamzooka /var/www/
 RUN useradd bamzooka -s /bin/bash -m -U
+
+COPY metadot-workspace/ /tmp/sourcecode
+RUN cd /tmp/sourcecode
+RUN yarn install
+RUN yarn build-bamzooka-client
+
 RUN mkdir -p /var/www
 RUN cd /var/www
 COPY metadot-workspace/apps/bamzooka-backend/ /var/www/bamzooka
