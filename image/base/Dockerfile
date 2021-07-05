@@ -63,6 +63,9 @@ RUN cd / &&\
 ADD install-nginx /tmp/install-nginx
 RUN /tmp/install-nginx
 
+# Yarn
+RUN npm install -g yarn
+
 # Install Mysql
 #ADD install-mysql /tmp/install-mysql
 #RUN /tmp/install-mysql
@@ -140,23 +143,29 @@ ADD cron.d_anacron /etc/cron.d/anacron
 #RUN mv bamzooka /var/www/
 RUN useradd bamzooka -s /bin/bash -m -U
 
-COPY metadot-workspace/ /tmp/sourcecode
-RUN cd /tmp/sourcecode
-RUN yarn install
-RUN yarn build-bamzooka-client
+#RUN cd /var/www
+COPY bamzooka/ /tmp/bamzooka
+# BUILD APP
+# BUILD APP
+# BUILD APP
+# BUILD APP
+# BUILD APP
+# BUILD APP
+# RUN git clone --depth 1 https://github.com/metadot/metadot-workspace.git /tmp/bamzooka
 
-RUN mkdir -p /var/www
-RUN cd /var/www
-COPY metadot-workspace/apps/bamzooka-backend/ /var/www/bamzooka
-RUN mkdir -p /var/www/bamzooka/log
-# RUN   git clone --depth 1 https://github.com/supercobra/blograilspg.git /var/www/bamzooka
+#/var/www/bamzooka
+
+# Build UI - will be located rails public/client folder
+RUN cd /tmp/bamzooka &&\
+    yarn install &&\
+    yarn build-bamzooka-client
 # RUN   cd /var/www/bamzooka &&\
     # git remote set-branches --add origin tests-passed &&\
-
-# Yarn
-RUN npm install -g yarn
-RUN yarn install
-
+# UI packages
+# mv rails backend
+RUN mkdir -p /var/www
+RUN mv /tmp/bamzooka/apps/bamzooka-backend /var/www/bamzooka
+RUN mkdir -p /var/www/bamzooka/log
 RUN chown -R bamzooka:bamzooka /var/www/bamzooka
 RUN       cd /var/www/bamzooka &&\
 ##       bundle config set --local deployment 'true' &&\
