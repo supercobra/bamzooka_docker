@@ -14,6 +14,8 @@ cp -r $APP ./image/base
 ls -l ./image/base
 docker build  image/base -t supercobra/bamzooka
 set +xe
+rm -rf $APP 
+
 echo "+=======================+"
 echo "|   IMAGE BUILD DONE    |"
 echo "+=======================+"
