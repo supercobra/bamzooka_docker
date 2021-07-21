@@ -15,20 +15,18 @@ else
     sleep 2
 fi
 set -xe
-APP=/tmp/bamzooka
+APP=./image/base/bamzooka
 rm -rf $APP # remove previous build if any
 git clone --depth=1 git@github.com:metadot/metadot-workspace.git $APP
 rm -f $APP/apps/bamzooka-backend/log/*
 rm -rf $APP/apps/bamzooka-backend/tmp
 
-mv $APP ./image/base
-ls -l ./image/base
 VERSION=`date +%Y%m%d.%H%M%S`
 BASE_VERSION="2.0"
 FULLNAME=$NAME:$BASE_VERSION.$VERSION
 docker build  image/base -t $FULLNAME
 set +xe
-rm -rf ./image/base/bamzooka 
+rm -rf $APP
 
 echo "+=======================+"
 echo "|   IMAGE BUILD DONE    |"
