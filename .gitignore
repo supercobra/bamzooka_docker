@@ -18,3 +18,4 @@ image/bamzooka_dev/redis.template.yml
 .gc-state/*
 .vagrant/
 .idea/
+image/base/bamzooka
