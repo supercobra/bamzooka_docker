@@ -26,9 +26,9 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo ap
     npm install -g eslint babel-eslint &&\
     cd /var/www/bamzooka && sudo -E -u bamzooka -H yarn install
 
-RUN cd /var/www/bamzooka && sudo -E -u bamzooka -H bundle exec rake plugin:install_all_official &&\
-    sudo -E -u bamzooka -H bundle exec rake plugin:install_all_gems &&\
-    chown -R bamzooka /var/run/postgresql
+#RUN cd /var/www/bamzooka && sudo -E -u bamzooka -H bundle exec rake plugin:install_all_official &&\
+    #sudo -E -u bamzooka -H bundle exec rake plugin:install_all_gems &&\
+RUN    chown -R bamzooka /var/run/postgresql
 
 WORKDIR /var/www/bamzooka
 ENV LANG en_US.UTF-8
