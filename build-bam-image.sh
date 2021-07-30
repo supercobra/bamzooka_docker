@@ -40,9 +40,9 @@ echo "Pushing image to docker.com"
     sleep 2
     set -xe
     docker push $FULLNAME
-    echo "Pushing latest as wel..."
-    docker image tag $FULLNAME  $NAME:latest
-    docker image push $NAME:latest
+    # echo "Pushing latest as wel..."
+    # docker image tag $FULLNAME  $NAME:latest
+    # docker image push $NAME:latest
     set +xe
     echo "+"
     echo "|"
