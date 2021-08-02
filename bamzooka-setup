@@ -201,9 +201,6 @@ check_disk_and_memory() {
       echo "Ctrl+C to exit or wait 5 seconds to have a 2GB swapfile created."
       sleep 5
 
-      ##
-      ## derived from https://meta.bamzooka.org/t/13880
-      ##
       install -o root -g root -m 0600 /dev/null /swapfile
       fallocate -l 2G /swapfile
       mkswap /swapfile

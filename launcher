@@ -93,7 +93,8 @@ git_rec_version='1.8.0'
 config_file=containers/"$config".yml
 cidbootstrap=cids/"$config"_bootstrap.cid
 local_bamzooka=local_bamzooka
-image="supercobra/bamzooka:2.0.20210730.145841"
+
+image="FULLNAME"
 docker_path=`which docker.io 2> /dev/null || which docker`
 git_path=`which git`
 
