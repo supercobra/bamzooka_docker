@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Push docker image to docker hub
+# Update git repo with new version
+#
 if [ $# -lt 1 ]; then
   echo "Usage: $0 <image_name>"
   exit 1
@@ -10,8 +13,7 @@ echo "Pushing to docker.com: $FULLNAME"
 docker image push $FULLNAME
 
 # update launcher script with new version
-sed -i 's:image="supercobra/bamzooka.*:image="$FULLNAME":g' ./launcher
-git add launcher
+sed -i "s:^image=\".*:image=\"$FULLNAME\":g" ./launcher git add launcher
 git commit -m "Updated image version to $FULLNAME."
 git push
 echo "+"

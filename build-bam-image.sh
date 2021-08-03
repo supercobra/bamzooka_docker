@@ -38,11 +38,7 @@ if [ "$want_to_push" == "y" ]; then
   echo "Pushing image to docker.com"
   sleep 2
   set -xe
-  docker push $FULLNAME
-  # echo "Pushing latest as wel..."
-  # docker image tag $FULLNAME  $NAME:latest
-  # docker image push $NAME:latest
-  update_launcher_script
+  ./push_docker.sh $FULLNAME
   set +xe
   echo "+"
   echo "|"
@@ -59,12 +55,3 @@ fi
 
 echo "REMEMBER to update the "
 exit 0
-
-update_launcher_script() {
-  # update git pull version line in launcher file
-  # sed replace a line that start with
-  sed -i 's:image="supercobra/bamzooka.*:image="$FULLNAME":g' ./launcher
-  git add launcher
-  git commit -m "Updated image version to $FULLNAME."
-  git push
-}
