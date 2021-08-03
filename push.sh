@@ -1,11 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
-# check there is one argument input
-if [ $# -lt 1 ]
-  echo "$0 <image_name>"
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 <image_name>"
   exit 1
 fi
-
 
 FULLNAME=$1
 echo "Pushing to docker.com: $FULLNAME"
@@ -29,4 +27,3 @@ echo "|                            "
 echo "+----------> ALL DONE!!!"
 sleep 2
 set -xe
-
