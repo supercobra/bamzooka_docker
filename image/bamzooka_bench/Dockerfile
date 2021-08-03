@@ -3,7 +3,6 @@
 FROM bamzooka/bamzooka_test:1.4.0
 ENV RAILS_ENV profile
 
-#LABEL maintainer="Gerhard Schlager <mail@gerhard-schlager.at>"
 
 # Install ApacheBench
 RUN apt-get install -y apache2-utils libsqlite3-dev

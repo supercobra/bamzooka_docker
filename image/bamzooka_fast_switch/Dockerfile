@@ -4,7 +4,6 @@
 # Allow to easily switch Ruby version in images that derive off this
 FROM bamzooka/base:2.0.20180608
 
-#LABEL maintainer="Sam Saffron \"https://twitter.com/samsaffron\""
 
 RUN apt -y install ruby bison autoconf &&\
     cd /src && git clone https://github.com/sstephenson/ruby-build.git &&\

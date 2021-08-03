@@ -4,7 +4,6 @@ ARG tag=build
 FROM bamzooka/base:$tag
 ENV RAILS_ENV test
 
-MAINTAINER Sam Saffron "https://twitter.com/samsaffron"
 
 # configure Git to suppress warnings
 RUN sudo -E -u bamzooka -H git config --global user.email "you@example.com" &&\

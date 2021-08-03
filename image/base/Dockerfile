@@ -1,6 +1,5 @@
 ﻿# NAME:     bamzooka/base
 # VERSION:  release
-# CREDIT: bamzooka docker project
 # https://github.com/bamzooka/bamzooka_docker
 FROM debian:buster-slim
 
@@ -70,17 +69,17 @@ RUN npm install -g yarn
 #ADD install-mysql /tmp/install-mysql
 #RUN /tmp/install-mysql
 
-RUN apt -y install advancecomp jhead jpegoptim libjpeg-turbo-progs optipng
+# RUN apt -y install advancecomp jhead jpegoptim libjpeg-turbo-progs optipng
 
-RUN mkdir /jemalloc-stable && cd /jemalloc-stable &&\
-      wget https://github.com/jemalloc/jemalloc/releases/download/3.6.0/jemalloc-3.6.0.tar.bz2 &&\
-      tar -xjf jemalloc-3.6.0.tar.bz2 && cd jemalloc-3.6.0 && ./configure --prefix=/usr && make && make install &&\
-      cd / && rm -rf /jemalloc-stable
+# RUN mkdir /jemalloc-stable && cd /jemalloc-stable &&\
+#       wget https://github.com/jemalloc/jemalloc/releases/download/3.6.0/jemalloc-3.6.0.tar.bz2 &&\
+#       tar -xjf jemalloc-3.6.0.tar.bz2 && cd jemalloc-3.6.0 && ./configure --prefix=/usr && make && make install &&\
+#       cd / && rm -rf /jemalloc-stable
 
-RUN mkdir /jemalloc-new && cd /jemalloc-new &&\
-      wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2 &&\
-      tar -xjf jemalloc-5.2.1.tar.bz2 && cd jemalloc-5.2.1 && ./configure --prefix=/usr --with-install-suffix=5.2.1 && make build_lib && make install_lib &&\
-      cd / && rm -rf /jemalloc-new
+# RUN mkdir /jemalloc-new && cd /jemalloc-new &&\
+#       wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2 &&\
+#       tar -xjf jemalloc-5.2.1.tar.bz2 && cd jemalloc-5.2.1 && ./configure --prefix=/usr --with-install-suffix=5.2.1 && make build_lib && make install_lib &&\
+#       cd / && rm -rf /jemalloc-new
 
 RUN echo 'gem: --no-document' >> /usr/local/etc/gemrc &&\
     mkdir /src && cd /src && git clone https://github.com/sstephenson/ruby-build.git &&\
