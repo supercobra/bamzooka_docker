@@ -13,7 +13,7 @@ echo "Pushing to docker.com: $FULLNAME"
 docker image push $FULLNAME
 
 # update launcher script with new version and commit and push
-sed -i "s/^image=\".*/image=\"$FULLNAME\"/g" ./launcher
+sed -i "s|^image=\".*|image=\"$FULLNAME\"|g" ./launcher
 git add launcher
 git commit -m "Updated image version to $FULLNAME."
 git push
