@@ -1,5 +1,5 @@
 #!/bin/bash
-NAME="supercobra/bamzooka"
+NAME="bamzooka/bamzooka"
 echo "+=======================+"
 echo "| BUILDING DOCKER IMAGE |"
 echo "+=======================+"
